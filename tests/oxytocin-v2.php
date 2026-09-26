@@ -71,7 +71,7 @@ try {
         'Reorder does not count draft');
     $db->exec("UPDATE chapters SET content=' ' WHERE id=$draft");
     expectFailure(fn() => v2_publication($db,$draft,1,'publish'), 'Cannot publish empty');
-    v2_publication($db,$later,1,'unpublish');
+    v2_publication($db,$later,2,'unpublish');
     verify(array_column(v2_numbered_chapters($db),'public_number') === [1,null,null],
         'Unpublish removes global number');
     expectFailure(fn() => v2_delete($db,'episodes',$ep0),'Reject deleting parent');
