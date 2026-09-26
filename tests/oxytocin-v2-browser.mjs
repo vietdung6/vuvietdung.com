@@ -76,7 +76,7 @@ try {
     'Full episode shows two published chapters');
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_ONE_UNIQUE' }).count(), 1);
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_TWO_UNIQUE' }).count(), 1);
-  assert(!(await page.locator('body').innerText()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
+  assert(!(await page.content()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
 
   // Global chapter navigation works across episode boundaries.
   await page.goto(at('chapter.php?id=1'));
@@ -148,12 +148,12 @@ try {
   await popup.close();
 
   await page.goto(at('index.php'));
-  assert(!(await page.locator('body').innerText()).includes('BROWSER_DRAFT'),
+  assert(!(await page.content()).includes('BROWSER_DRAFT'),
     'Preview did not make draft public');
   await admin.locator('button[name="chapter_intent"][value="save"]').click();
   await admin.waitForURL(/saved=1/);
   await page.reload();
-  assert(!(await page.locator('body').innerText()).includes('BROWSER_DRAFT'),
+  assert(!(await page.content()).includes('BROWSER_DRAFT'),
     'Save draft never publishes');
   const draftRow = admin.locator('tr').filter({ hasText: 'BROWSER_DRAFT' });
   const href = await draftRow.locator('a[href*="edit="]').getAttribute('href');
@@ -163,8 +163,8 @@ try {
   await admin.locator('button[name="chapter_intent"][value="save_publish"]').click();
   await admin.waitForURL(/saved=1/);
   await page.reload();
-  assert((await page.locator('body').innerText()).includes('BROWSER_DRAFT'),
-    'Explicit publish makes chapter visible');
+  assert((await page.content()).includes('BROWSER_DRAFT'),
+    'Explicit publish makes chapter visible even inside collapsed table of contents');
   const exposed = await page.request.get(at('chapter.php?id=' + id));
   assert.equal(exposed.status(), 200);
   assert((await exposed.text()).includes('BROWSER_DRAFT_EDITOR'));
