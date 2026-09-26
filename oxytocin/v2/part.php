@@ -14,13 +14,13 @@ v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
     <div class="page-label"><?= v2_h($part['badge'] ?: 'Phần ' . $part['num']) ?></div>
     <h1 class="page-title"><?= v2_h($part['en'] ?: $part['vi']) ?></h1>
     <?php if ($part['en'] && $part['vi']): ?><div class="page-subtitle"><?= v2_h($part['vi']) ?></div><?php endif; ?>
-    <div class="page-divider"><span></span>✦<span></span></div>
+    <div class="v2-rule" aria-hidden="true"></div>
     <?php if ($part['description']): ?><p class="page-intro"><?= nl2br(v2_h($part['description'])) ?></p><?php endif; ?>
 </header>
 <section class="v2-part-shelves" aria-label="Danh sách Arc">
     <?php foreach ($part['arcs'] as $arc): ?>
     <section class="mini-toc v2-arc-shelf">
-        <div class="mini-toc-label"><a href="arc.php?id=<?= $arc['id'] ?>">Arc <?= $arc['num'] ?> · <?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?> ↗</a></div>
+        <div class="mini-toc-label v2-arc-heading"><span class="v2-arc-index">Arc <?= $arc['num'] ?></span><a href="arc.php?id=<?= $arc['id'] ?>"><?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?></a></div>
         <?php if ($arc['intro']): ?><p class="v2-arc-intro"><?= v2_h($arc['intro']) ?></p><?php endif; ?>
         <div class="episode-cards">
             <?php foreach ($arc['episodes'] as $episode): ?>
@@ -36,7 +36,7 @@ v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
                 <?php if ($episode['summary']): ?><p class="ep-card-desc"><?= v2_h($episode['summary']) ?></p><?php endif; ?>
                 <div class="ep-card-foot">
                     <span class="ep-card-meta"><?= count($episode['chapters']) ?> chương</span>
-                    <span class="ep-card-arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
+                    
                 </div>
             </a>
             <?php endforeach; ?>
