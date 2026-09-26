@@ -47,6 +47,15 @@ function v2_clean_node(DOMNode $node, DOMDocument $doc): ?DOMNode {
         default => 'span'
     };
     $safe = $doc->createElement($tag);
+    // A line containing only --- / ✦ ✦ ✦ is a SCENE break, never a chapter split.
+    if ($tag === 'p') {
+        $marker = preg_replace('/\\s+/u','',(string)$node->textContent) ?? '';
+        if ($marker !== '' && preg_match('/^[*\\-✦_.]{3,}$/u', $marker)) {
+            $safe->setAttribute('class','scene-break');
+            $safe->appendChild($doc->createTextNode('✦ ✦ ✦'));
+            return $safe;
+        }
+    }
     $class = strtolower(trim($node->getAttribute('class')));
     $style = strtolower($node->getAttribute('style'));
     $style = preg_replace('/\s+/', '', $style) ?? '';
