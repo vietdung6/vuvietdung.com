@@ -106,7 +106,14 @@ try {
   assert(page.url().endsWith('chapter.php?id=3'));
   assert.equal(await page.locator('a[rel="next"]').getAttribute('href'), 'chapter.php?id=4');
 
-  // Reader settings carry over to the next page and survive a reload.
+  // Reader settings use the original floating controls after scrolling.
+  await page.evaluate(() => {
+    scrollTo({ top: 440, behavior: 'instant' });
+    dispatchEvent(new Event('scroll'));
+  });
+  await page.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
+  assert.equal(await page.locator('.reader-tools svg').count(), 0,
+    'Reading controls use text, never decorative icons');
   await page.locator('#readerTheme').click();
   await page.locator('#readerFont').click();
   await page.goto(at('chapter.php?id=1'));
@@ -114,6 +121,24 @@ try {
     'Light background persisted');
   assert(await page.locator('body').evaluate(node => node.classList.contains('font-large')),
     'Larger font persisted');
+  // Fullscreen expands the reading page and hides surrounding navigation.
+  await page.evaluate(() => {
+    scrollTo({ top: 440, behavior: 'instant' });
+    dispatchEvent(new Event('scroll'));
+  });
+  await page.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
+  await page.locator('#readerFullscreen').click();
+  assert(await page.locator('body').evaluate(node => node.classList.contains('reader-immersive')),
+    'Fullscreen button enters distraction-free reading mode');
+  assert.equal(await page.locator('#readerFullscreen').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('.reader-topbar').evaluate(node => getComputedStyle(node).display), 'none',
+    'Fullscreen hides non-reading navigation');
+  assert.equal(await page.locator('.reader-tools svg').count(), 0,
+    'Fullscreen adds no new icons');
+  await page.locator('#readerFullscreen').click();
+  await page.waitForFunction(() => !document.fullscreenElement);
+  assert(!await page.locator('body').evaluate(node => node.classList.contains('reader-immersive')),
+    'Reader exits fullscreen without changing saved font or theme');
 
   // Restore reading position in the second chapter of full-episode mode.
   await page.goto(at('episode-read.php?id=1'));
@@ -253,8 +278,23 @@ try {
   await mobile.locator('a.reader-primary').click();
   await assertNoOverflow(mobile, 'Mobile full episode');
   assert.equal(await mobile.locator('section.v2-full-chapter').count(), 2);
+  await mobile.evaluate(() => {
+    scrollTo({ top: 440, behavior: 'instant' });
+    dispatchEvent(new Event('scroll'));
+  });
+  await mobile.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
   await mobile.locator('#readerFont').click();
   assert(await mobile.locator('body').evaluate(node => node.classList.contains('font-large')));
+  // Force the no-Fullscreen-API path (e.g. iPhone Safari) in mobile Chromium.
+  await mobile.evaluate(() => Object.defineProperty(document, 'fullscreenEnabled',
+    { configurable: true, value: false }));
+  await mobile.locator('#readerFullscreen').click();
+  assert(await mobile.locator('body').evaluate(node => node.classList.contains('reader-immersive')),
+    'iPhone fallback keeps a distraction-free reader without browser fullscreen');
+  assert.equal(await mobile.locator('#readerFullscreen').getAttribute('aria-pressed'), 'true');
+  await assertNoOverflow(mobile, 'Mobile immersive reading mode');
+  await mobile.locator('#readerFullscreen').click();
+  assert(!await mobile.locator('body').evaluate(node => node.classList.contains('reader-immersive')));
   await mobileContext.close();
 
   assert.deepEqual(errors, [], 'No uncaught browser JavaScript errors: ' + errors.join(' | '));
