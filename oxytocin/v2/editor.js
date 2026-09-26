@@ -99,10 +99,20 @@
       if (dropped.has(tag)) return '';
       const children = Array.from(node.childNodes).map(visit).join('');
       if (tag === 'br') return '<br>';
-      if (block.has(tag)) return '<p>' + children + '</p>';
+      if (block.has(tag)) {
+        const allowed = ['scene-break', 'center-red', 'beat'];
+        const marker = allowed.find(name => node.classList.contains(name));
+        return '<p' + (marker ? ' class="' + marker + '"' : '') + '>' + children + '</p>';
+      }
       const mapped = named[tag];
       if (mapped) return '<' + mapped + '>' + children + '</' + mapped + '>';
       let inner = children;
+      // Preserve only our story's own approved highlight classes in recovery.
+      if (tag === 'span' && node.classList.contains('highlight-red')) {
+        inner = '<span class="highlight-red">' + inner + '</span>';
+      } else if (tag === 'span' && node.classList.contains('highlight-bright')) {
+        inner = '<span class="highlight-bright">' + inner + '</span>';
+      }
       const style = (node.getAttribute('style') || '').toLowerCase().replace(/\s+/g, '');
       if (/font-weight:(bold|[6-9]00)/.test(style)) inner = '<strong>' + inner + '</strong>';
       if (style.includes('font-style:italic')) inner = '<em>' + inner + '</em>';
