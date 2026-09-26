@@ -72,6 +72,10 @@ try {
     'Original cover-title typography is restored');
   assert.equal(await page.locator('svg').count(), 0,
     'No decorative SVG icons appear on the reader');
+  assert.equal(await page.locator('.v2-library-eyebrow, .v2-card-open').count(), 0,
+    'Cover has no repeated category label or decorative open prompt');
+  assert.equal(await page.locator('body').evaluate(node => getComputedStyle(node).fontSize), '16.5px',
+    'Default reading typography is slightly smaller');
   assert(!(await page.locator('body').innerText()).includes('Trang riêng của phần'));
   assert(!(await page.locator('body').innerText()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
   await assertNoOverflow(page, 'Desktop cover');
@@ -79,6 +83,8 @@ try {
   assert(page.url().includes('part.php?id=1'), 'Clicking a Part opens a separate page');
   assert.equal(await page.locator('.v2-arc-shelf .episode-card').count(), 2,
     'Part page shows the original episode cards');
+  assert.equal(await page.locator('.ep-card-badge').count(), 0,
+    'Episode numbers appear once; do not repeat them in a badge');
   assert.equal(await page.locator('svg').count(), 0, 'Part page has no SVG icons');
   await page.locator('.v2-arc-heading a').click();
   assert(page.url().includes('arc.php?id=1'), 'Arc heading navigates to the Arc page');
@@ -89,6 +95,12 @@ try {
   assert(page.url().includes('episode.php?id=1'), 'Episode card navigates to chapter list');
   assert.equal(await page.locator('.chapter-list a').count(), 2,
     'Episode page contains only published chapters');
+  assert.equal(await page.locator('.v2-episode-chapter-heading .reader-primary').count(), 1,
+    'One inline read-the-entire-episode action accompanies the chapter list');
+  assert.equal(await page.locator('.ep-label-badge').count(), 0,
+    'Episode header does not repeat the part badge');
+  assert.equal(await page.locator('.chapter-list a').first().evaluate(node => getComputedStyle(node).display), 'grid',
+    'Chapter links form compact two-column editorial rows');
   assert.equal(await page.locator('svg').count(), 0, 'Episode page has no SVG icons');
   await page.goto(at('episode.php?id=1'));
   assert.equal(await page.locator('.chapter-list a').count(), 2, 'Episode lists only published chapters');
@@ -113,6 +125,17 @@ try {
   await page.locator('a[rel="next"]').click();
   assert(page.url().endsWith('chapter.php?id=3'));
   assert.equal(await page.locator('a[rel="next"]').getAttribute('href'), 'chapter.php?id=4');
+  assert.equal(await page.locator('.v2-backlinks, .reader-tools a').count(), 0,
+    'Reader no longer duplicates table-of-contents and return links');
+  const breadcrumbLinkStyle = await page.locator('.v2-breadcrumb a').first().evaluate(node => ({
+    linkColor: getComputedStyle(node).color,
+    breadcrumbColor: getComputedStyle(node.closest('.v2-breadcrumb')).color,
+    textDecoration: getComputedStyle(node).textDecorationLine
+  }));
+  assert.equal(breadcrumbLinkStyle.linkColor, breadcrumbLinkStyle.breadcrumbColor,
+    'Visited breadcrumb uses the same neutral color as surrounding navigation');
+  assert.equal(breadcrumbLinkStyle.textDecoration, 'none',
+    'Breadcrumb is not a browser-default purple underlined link');
 
   // Reader settings use the original floating controls after scrolling.
   await page.evaluate(() => {
@@ -120,8 +143,8 @@ try {
     dispatchEvent(new Event('scroll'));
   });
   await page.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
-  assert.equal(await page.locator('.reader-tools svg').count(), 6,
-    'All reading icons live exclusively inside the four floating controls');
+  assert.equal(await page.locator('.reader-tools svg').count(), 5,
+    'Only theme, font size, and fullscreen controls remain');
   assert.equal(await page.locator('svg:not(.reader-tools svg)').count(), 0,
     'No icons appear in titles, cards, breadcrumbs or other reader UI');
   await page.locator('#readerTheme').click();
@@ -143,7 +166,7 @@ try {
   assert.equal(await page.locator('#readerFullscreen').getAttribute('aria-pressed'), 'true');
   assert.equal(await page.locator('.reader-topbar').evaluate(node => getComputedStyle(node).display), 'none',
     'Fullscreen hides non-reading navigation');
-  assert.equal(await page.locator('.reader-tools svg').count(), 6,
+  assert.equal(await page.locator('.reader-tools svg').count(), 5,
     'Fullscreen changes the visible glyph without creating additional icons');
   assert.equal(await page.locator('.icon-expand').evaluate(node => getComputedStyle(node).display),
     'none', 'Expanded reader displays the collapse glyph');
@@ -190,6 +213,18 @@ try {
   assert((await admin.locator('body').innerText()).includes('TEST SESSION READY'));
   await admin.goto(at('admin.php'));
   assert.equal(await admin.locator('#chapterForm').count(), 1, 'Existing admin session unlocks v2');
+  assert.equal(await admin.locator('.sidebar nav a span').count(), 0,
+    'Admin tabs do not duplicate numeric totals shown in the dashboard');
+  await admin.goto(at('admin.php?tab=arcs'));
+  assert(await admin.getByText('Arc số mấy trong phần?').isVisible(),
+    'Arc field identifies a position in its Part, not a count');
+  await admin.goto(at('admin.php?tab=episodes'));
+  assert(await admin.getByText('Tập số mấy trong Arc?').isVisible(),
+    'Episode field identifies a position in its Arc, not a count');
+  assert.equal(await admin.locator('table thead th').count(), 3,
+    'Episode list does not contain an empty status column');
+  assert((await admin.locator('table thead').innerText()).includes('Số hiển thị'),
+    'Admin table explains that the first column is a displayed number');
 
   // The restored Settings tab edits site metadata and synopsis without publishing a chapter.
   await admin.goto(at('admin.php?tab=settings'));
@@ -299,8 +334,8 @@ try {
     dispatchEvent(new Event('scroll'));
   });
   await mobile.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
-  assert.equal(await mobile.locator('.reader-tools button, .reader-tools a').count(), 4,
-    'Mobile reading controls have four compact circular actions');
+  assert.equal(await mobile.locator('.reader-tools button, .reader-tools a').count(), 3,
+    'Mobile reading controls have just three compact actions');
   assert.equal(await mobile.locator('svg:not(.reader-tools svg)').count(), 0,
     'Mobile navigation outside reading controls stays icon-free');
   await mobile.locator('#readerFont').click();
