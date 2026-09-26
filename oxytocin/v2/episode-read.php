@@ -30,7 +30,7 @@ v2_reader_breadcrumb([
         <span class="ep-label-number">Đọc toàn bộ tập <?= $episode['num'] ?></span></div>
     <h1 class="ep-title-en"><?= v2_h($episode['en'] ?: $episode['vi'] ?: 'Tập ' . $episode['num']) ?></h1>
     <?php if ($episode['en'] && $episode['vi']): ?><div class="ep-title-vi"><?= v2_h($episode['vi']) ?></div><?php endif; ?>
-    <div class="page-divider ep-divider"><span></span>✦<span></span></div>
+    <div class="v2-rule" aria-hidden="true"></div>
 </header>
 <?php foreach ($chapterBodies as $i => $body):
     $chapter = $numbers[(int)$body['id']]; ?>
@@ -45,14 +45,14 @@ v2_reader_breadcrumb([
 <nav class="bottom-nav v2-chapter-nav" aria-label="Điều hướng ngoài tập">
     <?php if ($prev): ?>
     <a class="bottom-nav-btn" href="chapter.php?id=<?= $prev['id'] ?>">
-        <span class="nav-dir">← Chương trước tập</span><span class="nav-name">Chương <?= $prev['number'] ?></span>
+        <span class="nav-dir">Chương trước tập</span><span class="nav-name">Chương <?= $prev['number'] ?></span>
     </a>
-    <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">← Chương trước tập</span><span class="nav-name">Đầu truyện</span></span><?php endif; ?>
+    <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">Chương trước tập</span><span class="nav-name">Đầu truyện</span></span><?php endif; ?>
     <?php if ($next): ?>
     <a class="bottom-nav-btn" href="chapter.php?id=<?= $next['id'] ?>">
-        <span class="nav-dir">Chương sau tập →</span><span class="nav-name">Chương <?= $next['number'] ?></span>
+        <span class="nav-dir">Chương sau tập</span><span class="nav-name">Chương <?= $next['number'] ?></span>
     </a>
-    <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">Chương sau tập →</span><span class="nav-name">Đã hết chương được đăng</span></span><?php endif; ?>
+    <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">Chương sau tập</span><span class="nav-name">Đã hết chương được đăng</span></span><?php endif; ?>
 </nav>
-<div class="v2-backlinks"><a href="episode.php?id=<?= $id ?>">← Danh sách chương tập <?= $episode['num'] ?></a><a href="index.php">Mục lục</a></div>
+<div class="v2-backlinks"><a href="episode.php?id=<?= $id ?>">Danh sách chương tập <?= $episode['num'] ?></a><a href="index.php">Mục lục</a></div>
 <?php v2_reader_close(); ?>
