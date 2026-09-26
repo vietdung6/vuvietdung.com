@@ -1,24 +1,22 @@
 import * as THREE from 'three';
 import { camera } from './scene-core.js';
 import { state } from './state.js';
+import { cockpitCameraAnchor, cockpitLookAnchor } from './cockpit.js';
 
 export const mouse  = { x: 0, y: 0 };
 export const smooth = { x: 0, y: 0 };
 
-export const camPos  = new THREE.Vector3(0, 2.7, -6.5);
-export const camLook = new THREE.Vector3(0, 1.0, -25);
-export const tPos    = new THREE.Vector3(0, 2.7, -6.5);
-export const tLook   = new THREE.Vector3(0, 1.0, -25);
+export const camPos  = new THREE.Vector3(0, 0.95, -4.85);
+export const camLook = new THREE.Vector3(0, 0.62, -14.0);
+export const tPos    = new THREE.Vector3(0, 0.95, -4.85);
+export const tLook   = new THREE.Vector3(0, 0.62, -14.0);
 
 export const orbit = {
   yaw: 0.35, pitch: 0.18, dist: 52,
   targetYaw: 0.35, targetPitch: 0.18, targetDist: 52
 };
 
-/* Camera mắt pilot — cao 2.7, lùi ra sau, nhìn xuống nhẹ */
-const COCKPIT_EYE  = { x: 0, y: 2.7,  z: -6.5 };
-const COCKPIT_LOOK = { x: 0, y: 1.0,  z: -25.0 };
-
+/* Pilot-eye camera is anchored to the actual cockpit module. */
 const cockpitPos  = new THREE.Vector3();
 const cockpitLook = new THREE.Vector3();
 const extPos      = new THREE.Vector3();
@@ -31,16 +29,14 @@ export function updateCamera(dt) {
   const targetBlend = state.viewMode === 'exterior' ? 1.0 : 0.0;
   state.viewBlend += (targetBlend - state.viewBlend) * Math.min(1, dt * 2.8);
 
-  cockpitPos.set(
-    COCKPIT_EYE.x + smooth.x * 0.55,
-    COCKPIT_EYE.y + smooth.y * 0.30,
-    COCKPIT_EYE.z
-  );
-  cockpitLook.set(
-    COCKPIT_LOOK.x + smooth.x * 4.0,
-    COCKPIT_LOOK.y + smooth.y * 3.5,
-    COCKPIT_LOOK.z
-  );
+  cockpitCameraAnchor.getWorldPosition(cockpitPos);
+  cockpitLookAnchor.getWorldPosition(cockpitLook);
+
+  /* small head movement, but always relative to the real cabin */
+  cockpitPos.x += smooth.x * 0.34;
+  cockpitPos.y += smooth.y * 0.18;
+  cockpitLook.x += smooth.x * 2.6;
+  cockpitLook.y += smooth.y * 1.8;
 
   orbit.yaw   += (orbit.targetYaw   - orbit.yaw)   * Math.min(1, dt * 5.0);
   orbit.pitch += (orbit.targetPitch - orbit.pitch) * Math.min(1, dt * 5.0);
