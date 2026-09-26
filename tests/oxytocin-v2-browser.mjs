@@ -95,6 +95,14 @@ try {
   await page.locator('a.reader-primary').click();
   assert.equal(await page.locator('section.v2-full-chapter').count(), 2,
     'Full episode shows two published chapters');
+  assert.equal(await page.locator('.v2-chapter-divider').count(), 1,
+    'Exactly one understated rule separates two chapters');
+  assert.equal(await page.locator('.v2-full-heading').count(), 0,
+    'Continuous reading does not repeat large chapter headers');
+  assert.equal(await page.locator('section.v2-full-chapter[aria-label^="Chương"]').count(), 2,
+    'Chapter boundaries remain accessible for assistive technology');
+  assert.equal(await page.locator('.v2-chapter-divider').evaluate(node =>
+    getComputedStyle(node).height), '1px', 'Chapter separator is a hairline');
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_ONE_UNIQUE' }).count(), 1);
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_TWO_UNIQUE' }).count(), 1);
   assert(!(await page.content()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
