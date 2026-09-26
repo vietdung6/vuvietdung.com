@@ -10,6 +10,9 @@ on:
       - 'tests/oxytocin-v2-reader-fixture.php'
       - 'tests/oxytocin-v2-reader-http.sh'
       - 'tests/oxytocin-v2-browser.mjs'
+      - 'tests/oxytocin-v2-autoinit.php'
+      - 'tests/oxytocin-v2-legacy-login.php'
+      - '.gitignore'
       - 'tests/oxytocin-v2-backup.sh'
       - 'tests/oxytocin-v2-archive.sh'
       - '.github/workflows/deploy-production.yml'
@@ -50,8 +53,12 @@ jobs:
           php -l tests/oxytocin-v2-editor.php
           php -l tests/oxytocin-v2-preview.php
           php -l tests/oxytocin-v2.php
+          php -l tests/oxytocin-v2-autoinit.php
+          php -l tests/oxytocin-v2-legacy-login.php
       - name: SQLite CRUD and isolation tests
         run: php tests/oxytocin-v2.php
+      - name: Automatic blank SQLite initialization and no-overwrite tests
+        run: php tests/oxytocin-v2-autoinit.php
       - name: Rich editor and publication tests
         run: php tests/oxytocin-v2-editor.php
       - name: Preview cannot publish
@@ -75,7 +82,9 @@ jobs:
             --exclude '.gitignore' --exclude 'oxytocin/oxytocin.db' \
             --exclude 'oxytocin/*.db' --exclude 'oxytocin/*.db-*' --exclude 'oxytocin/*.sqlite*' \
             --exclude 'oxytocin/v2/*.db' --exclude 'oxytocin/v2/*.db-*' \
-            --exclude 'oxytocin/v2/*.sqlite*' --exclude 'oxytocin/.env*' \
+            --exclude 'oxytocin/v2/*.sqlite*' --exclude 'oxytocin/v2/.data/*.db*' \
+            --exclude 'oxytocin/v2/.data/*.sqlite*' --exclude 'oxytocin/v2/.data/.env*' \
+            --exclude 'oxytocin/.env*' \
             --exclude 'oxytocin/v2/.env*' --exclude 'oxytocin/error_log' \
             --exclude 'oxytocin/test_write.db'
           bash tests/oxytocin-v2-archive.sh "$stage"
