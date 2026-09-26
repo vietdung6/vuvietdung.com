@@ -189,6 +189,17 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Report only HTTP codes/response-server for diagnosis; never output DB bytes.
+          for route in /oxytocin/ /oxytocin/index.php /oxytocin/v2/index.php \
+            /oxytocin/v2/admin.php /oxytocin/v2/reader.css \
+            /oxytocin/v2/.data/oxytocin_v2.db; do
+            status=$(curl --silent --show-error --connect-timeout 10 --max-time 20 \
+              --output /dev/null --dump-header .deploy/probe-headers.txt \
+              --write-out "%{http_code}" "https://vuvietdung.com${route}" || true)
+            server=$(grep -im1 '^server:' .deploy/probe-headers.txt | tr -d '\r' || true)
+            echo "Probe ${route}: HTTP ${status} (${server:-server unknown})"
+          done
+
           v2_code=$(curl --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
             --location --output .deploy/v2-index.html --write-out "%{http_code}" \
             https://vuvietdung.com/oxytocin/v2/index.php)
