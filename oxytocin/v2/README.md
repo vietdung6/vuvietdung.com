@@ -2,27 +2,26 @@
 
 **Đã có mã nguồn trang đọc mới, nhưng chưa triển khai production.** Nhánh thử nghiệm bao gồm trang quản trị, trình soạn thảo và các trang đọc mới Phần → Arc → Tập → Chương. Không tự nhập lại truyện; không thay đổi `oxytocin.db`, `db.php`, `read.php` hoặc admin cũ.
 
-## Database
+## Dùng ngay trên cPanel (không cần cấu hình)
 
-Chạy PHP CLI trên máy chủ, tạo thư mục dữ liệu nằm **ngoài document root**, rồi đặt biến môi trường `OXYTOCIN_V2_DB_PATH` bằng đường dẫn tuyệt đối tới file CHƯA TỒN TẠI. Ví dụ: `/home/USER/oxy-private/oxytocin_v2.db`. Tạo bằng:
+1. Merge nhánh vào `main` để workflow hiện có triển khai code.
+2. Mở `/oxytocin/v2/index.php`. Lần đầu PHP tạo **một file SQLite trống**, tự áp dụng `schema.sql`, không nhập chương hoặc thay đổi `oxytocin.db`.
+3. Đăng nhập ở `/oxytocin/admin.php` như trước, rồi vào `/oxytocin/v2/admin.php`. Hai admin dùng chung phiên đăng nhập PHP; không có mật khẩu hoặc biến môi trường v2 thứ hai.
+4. Trong admin v2, tạo lần lượt Phần → Arc → Tập → Chương. Chương mới mặc định nháp. Chỉ nút **Đăng chương** mới làm nội dung xuất hiện trên v2.
 
-```sh
-php oxytocin/v2/init.php
-```
+**Dữ liệu lưu tại `oxytocin/v2/.data/oxytocin_v2.db`.** Thư mục `.data` có `.htaccess` chặn tất cả truy cập HTTP; file SQLite và journal được loại khỏi Git và gói deploy. Kiểm tra URL `/oxytocin/v2/.data/oxytocin_v2.db` phải trả 403/404, **không được tải được file**. Hosting phải dùng Apache/LiteSpeed hoặc áp dụng quy tắc chặn tương đương trên proxy.
 
-Lệnh chỉ tạo database trống khi chưa tồn tại. Trên web, `v2/lib.php` không tự khởi tạo file. Đường dẫn nằm trong repository/site hoặc trỏ vào database cũ sẽ bị từ chối. Biến môi trường phải được cấu hình cho PHP chạy qua web nữa; cấu hình shell tạm thời không tự áp dụng cho PHP-FPM/cPanel.
+Không cần phpMyAdmin, MySQL, Terminal hay PHP-FPM environment. Tùy chọn `OXYTOCIN_V2_DB_PATH` vẫn dùng được cho bản thử nghiệm hoặc khi muốn chuyển database ra ngoài web root. Khi file đã tồn tại, PHP đọc lại và **không tự tạo mới / ghi đè dữ liệu**. Nếu đường dẫn có SQLite không tương thích, hệ thống báo lỗi thay vì sửa file đó.
 
-## Đăng nhập
+**Hệ thống cũ vẫn chạy:** `/oxytocin/` và các URL `read.php?arc=...&ep=...` chưa được chuyển sang v2. v2 bắt đầu bằng một mục lục rỗng và chỉ hiển thị nội dung do chính mày bổ sung/đăng sau này.
 
-Thiết lập biến môi trường **`OXYTOCIN_V2_ADMIN_PASSWORD_HASH`** bằng mã băm do `password_hash` tạo ra. Không lưu mật khẩu hoặc mã băm vào repository. Không tái sử dụng mật khẩu quản trị cũ đã xuất hiện trong code công khai. Nếu chưa có mã băm hoặc database chưa khởi tạo, `v2/admin.php` trả về lỗi 503 và không thể đăng nhập.
-
-Admin ở `/oxytocin/v2/admin.php`. Nó dùng session riêng, CSRF cho mọi yêu cầu ghi, đăng nhập có giới hạn số lần thử, kiểm tra revision chương, các thao tác xóa là POST có bước xác nhận. Không cho xóa chương đang đăng hoặc mục còn dữ liệu con.
+**Lưu ý bảo mật:** admin cũ có mật khẩu trực tiếp trong mã nguồn GitHub công khai. Phiên quản trị v2 kế thừa cách đăng nhập này. Đổi mật khẩu cũ và đưa bí mật ra khỏi repository khi muốn bảo vệ bản thảo thật.
 
 ## Đánh số và xuất bản
 
 Số phần toàn series; số Arc trong mỗi phần; số tập trong mỗi Arc. Số chương hiển thị được tính theo thứ tự công khai của các chương đã đăng trên toàn series, không sử dụng ID. Chương mới mặc định nháp. Có nút đăng/hủy đăng tách biệt. Thao tác ↑ ↓ sắp xếp trong cấp tương ứng. Di chuyển chương sang tập khác bằng biểu mẫu sửa sẽ đặt ở cuối tập mới, không sinh trùng vị trí.
 
-**Lưu ý:** Chèn hoặc sắp xếp lại chương đã công khai có thể làm thay đổi số chương hiển thị. ID ổn định để sau này dùng trong URL; trang đọc và tương thích URL cũ thuộc bước sau. Trình soạn thảo trực quan, bản khôi phục và trang xem trước đã có trong bước 4; trang đọc công khai và mục lục thuộc bước 5.
+**Lưu ý:** Chèn hoặc sắp xếp lại chương đã công khai có thể làm thay đổi số chương hiển thị. ID trong URL ổn định. Trình soạn thảo thuộc bước 4, trang đọc thuộc bước 5.
 
 ## Trình soạn thảo (bước 4)
 
@@ -44,7 +43,7 @@ Số phần toàn series; số Arc trong mỗi phần; số tập trong mỗi Ar
 - `---` và `✦ ✦ ✦` trong một chương là dấu ngắt cảnh, không tự tách chương. HTML đã đăng được lọc lại trên máy chủ khi hiển thị.
 - Trang mới sử dụng bộ CSS Noir đang có, bổ sung `reader.css`; trang xem trước dùng chung CSS trình đọc. Không thiết kế lại UI gọn hơn trong bước này.
 
-**Chưa kiểm thử trên hosting hoặc bằng trình duyệt thực tế.** Trước khi merge/deploy cần kiểm tra trải nghiệm cuộn, cỡ chữ, phục hồi vị trí và chế độ đọc liên tập trên cả desktop và điện thoại. Hệ thống phải được cấu hình biến môi trường và database v2 trước khi thử trên hosting; thiếu cấu hình sẽ trả 503 và không tự tạo database.
+Đã có kiểm thử tự động Chromium desktop/mobile và HTTP, nhưng vẫn cần xác nhận trực tiếp trên hosting sau khi deploy: trang đọc v2 trả 200, admin sử dụng phiên đăng nhập cũ và URL SQLite bị chặn.
 
 ## Kiểm thử
 
@@ -53,8 +52,9 @@ php -l oxytocin/v2/lib.php
 php -l oxytocin/v2/admin.php
 php -l oxytocin/v2/init.php
 php tests/oxytocin-v2.php
+php tests/oxytocin-v2-autoinit.php
+bash tests/oxytocin-v2-reader-http.sh
 ```
 
-Database thử nghiệm nằm trong thư mục tạm bên ngoài website và được xóa sau test. Không chạy các lệnh này trên database production. Trước khi triển khai thật, sao lưu SQLite đang chạy bằng SQLite backup API hoặc `VACUUM INTO` và kiểm tra bản sao. Không chép database trống đè lên database hiện tại.
+Database kiểm thử nằm trong thư mục tạm và được xóa sau test. Không chạy bộ test trên database production. Có sẵn `backup-legacy.php` để sao lưu SQLite gốc bằng PHP CLI khi cần; không bao giờ ghi đè `oxytocin.db`.
 
-**Bảo mật cần làm riêng:** admin cũ đang có mật khẩu trực tiếp trong mã nguồn công khai. Cần đổi mật khẩu cũ và đưa bí mật ra khỏi repo trước khi tiếp tục sử dụng trang admin cũ.
