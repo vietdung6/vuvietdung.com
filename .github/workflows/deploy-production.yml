@@ -39,6 +39,18 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate homepage
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+
       - name: Validate PHP syntax
         shell: bash
         run: |
@@ -56,7 +68,7 @@ jobs:
           set -euo pipefail
           mkdir -p .deploy/site
 
-          rsync -a ./ .deploy/site/             --exclude '.git/'             --exclude '.github/'             --exclude '.deploy/'             --exclude 'oxytocin/oxytocin.db'             --exclude 'oxytocin/error_log'             --exclude 'oxytocin/test_write.db'
+          rsync -a ./ .deploy/site/             --exclude '.git/'             --exclude '.github/'             --exclude '.deploy/'             --exclude '.preview/'             --exclude 'node_modules/'             --exclude 'tests/'             --exclude 'scripts/'             --exclude 'package.json'             --exclude 'package-lock.json'             --exclude 'README.md'             --exclude '.gitignore'             --exclude 'oxytocin/oxytocin.db'             --exclude 'oxytocin/error_log'             --exclude 'oxytocin/test_write.db'
 
           VERSION="${GITHUB_SHA}"
 
@@ -147,14 +159,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          http_code=$(curl --silent --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 30             --output /dev/null             --write-out "%{http_code}"             https://vuvietdung.com/) || {
+          http_code=$(curl --silent --show-error             --retry 3             --retry-delay 2             --connect-timeout 10             --max-time 30             --location             --output .deploy/production.html             --write-out "%{http_code}"             https://vuvietdung.com/) || {
               echo "::error::Production smoke test could not reach the site."
               exit 1
             }
 
           case "$http_code" in
             2*|3*)
-              echo "Production is responding with HTTP $http_code."
+              if ! grep -Fq "js/app.js?v=${GITHUB_SHA}" .deploy/production.html; then
+                echo "::error::Production HTML is not serving the expected homepage version."
+                exit 1
+              fi
+              echo "Production homepage version verified: ${GITHUB_SHA}"
               ;;
             403)
               echo "::warning::Production returned HTTP 403 to the GitHub runner. Deployment itself succeeded; the host/WAF is blocking this automated probe."

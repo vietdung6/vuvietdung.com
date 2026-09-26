@@ -1,164 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#01020a" />
-  <title>VUVIETDUNG.COM | BLOG CÁ NHÂN</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080c0c"><meta name="description" content="Một góc vũ trụ của Vũ Việt Dũng. Vật lý, viết lách, những thử nghiệm và tiểu thuyết OXYTOCIN.">
+<title>Vũ Việt Dũng — Một góc vũ trụ</title>
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.164.1/build/three.module.js"}}</script>
 </head>
-<body>
-  <canvas id="scene-canvas"></canvas>
-  <div id="vignette"></div>
-  <div id="scanlines"></div>
-
-  <div id="hud">
-    <div class="corner tl"></div><div class="corner tr"></div>
-    <div class="corner bl"></div><div class="corner br"></div>
-
-    <header class="hud-top">
-      <div class="status">
-        <span class="dot"></span>
-        <span>SYSTEM: ONLINE&nbsp;&nbsp;//&nbsp;&nbsp;SECTOR: DEEP SPACE</span>
-        <span class="vel">VEL:<b id="vel-readout">0.90c</b></span>
-      </div>
-      <nav class="nav">
-        <a href="#" data-action="projects">Dự án cá nhân</a>
-        <a href="#" data-action="about">Giới thiệu</a>
-        <a href="#" data-action="contact">Liên hệ</a>
-        <a href="#" data-action="inspect">INSPECT VESSEL</a>
-      </nav>
-    </header>
-
-    <section class="hero" id="hero-banner">
-      <h1 class="pilot-name">DŨNG</h1>
-      <p class="tagline">Scientist</p>
-      <div class="hero-rule"></div>
-    </section>
-
-    <div class="hud-bottom">
-      <aside class="terminal">
-        <div class="term-head">// BRIDGE.LOG — LIVE TELEMETRY</div>
-        <pre class="term-body" id="term-body"></pre>
-      </aside>
-      <div class="cta-stack">
-        <button class="btn primary" id="btn-projects">▶ DEPLOY PROJECTS</button>
-        <button class="btn" id="btn-comms">◈ INITIATE COMMS</button>
-        <div class="aux-row">
-          <button class="btn btn-mini" id="btn-view">◉ EXTERIOR VIEW&nbsp;&nbsp;[C]</button>
-          <button class="btn btn-mini" id="btn-audio">♪ AUDIO: OFF</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================================
-       HOLOGRAPHIC PROJECT PANEL
-       ============================================================ -->
-  <div id="holo-panel" aria-hidden="true">
-    <div class="holo-backdrop" data-close></div>
-
-    <div class="holo-frame">
-      <!-- grid + scan overlays -->
-      <div class="holo-grid"></div>
-      <div class="holo-scan"></div>
-
-      <!-- corner brackets -->
-      <span class="holo-c tl"></span>
-      <span class="holo-c tr"></span>
-      <span class="holo-c bl"></span>
-      <span class="holo-c br"></span>
-
-      <!-- header -->
-      <header class="holo-header">
-        <div class="holo-header-l">
-          <span class="holo-badge">◄ MISSION ARCHIVE</span>
-          <h2 class="holo-title">PROJECT DATABASE</h2>
-        </div>
-        <div class="holo-header-r">
-          <span class="holo-stat"><b id="holo-count">05</b> ENTRIES</span>
-          <span class="holo-stat">CLASSIFIED · LEVEL&nbsp;3</span>
-        </div>
-      </header>
-
-      <!-- body -->
-      <div class="holo-body">
-        <!-- left: list -->
-        <nav class="holo-list" id="holo-list" role="listbox"></nav>
-
-        <!-- right: detail -->
-        <section class="holo-detail">
-          <div class="holo-detail-meta">
-            <span>MISSION&nbsp;<b id="holo-d-id">01</b></span>
-            <span class="holo-dot">·</span>
-            <span>STATUS:&nbsp;<b id="holo-d-status">ACTIVE</b></span>
-            <span class="holo-dot">·</span>
-            <span id="holo-d-year">2024</span>
-          </div>
-
-          <h3 class="holo-d-title" id="holo-d-title">ORBITAL ATLAS</h3>
-
-          <div class="holo-d-rule">
-            <span></span><span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span><span></span>
-          </div>
-
-          <p class="holo-d-desc" id="holo-d-desc"></p>
-
-          <div class="holo-d-stack">
-            <span class="holo-d-label">STACK ─────────</span>
-            <div class="holo-tags" id="holo-d-tags"></div>
-          </div>
-
-          <div class="holo-d-actions">
-            <button class="holo-btn" id="holo-view">
-              <span>⟶ VIEW MISSION</span>
-            </button>
-          </div>
-        </section>
-      </div>
-
-      <!-- footer -->
-      <footer class="holo-footer">
-        <div class="holo-keys">
-          <kbd>↑↓</kbd><span>NAVIGATE</span>
-          <kbd>⏎</kbd><span>OPEN</span>
-          <kbd>ESC</kbd><span>CLOSE</span>
-        </div>
-        <div class="holo-footer-r">
-          <span>CH 04</span>
-          <span class="holo-bar"><i></i></span>
-          <span>SIGNAL 98%</span>
-        </div>
-      </footer>
-    </div>
-  </div>
-
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="modal-panel">
-      <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
-      <h2>ESTABLISH UPLINK</h2>
-      <ul class="comms-list">
-        <li><span class="lbl">EMAIL</span><a href="mailto:me@vuvietdung.com">me@vuvietdung.com</a></li>
-        <li><span class="lbl">GITHUB</span><a href="https://github.com/vietdung6" target="_blank" rel="noopener">github.com/vietdung6</a></li>
-        <li><span class="lbl">Facebook</span><a href="https://facebook.com/antivietdung" target="_blank" rel="noopener">@antivietdung</a></li>
-      </ul>
-      <p class="modal-note">SIGNAL LATENCY: 0.0004s&nbsp;&nbsp;·&nbsp;&nbsp;ENCRYPTION: QUANTUM-GRADE&nbsp;&nbsp;·&nbsp;&nbsp;CHANNEL: SECURE</p>
-    </div>
-  </div>
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
-    }
-  }
-  </script>
-
-  <script type="module" src="js/main.js"></script>
-</body>
-</html>
+<body data-view="exterior">
+<a class="skip-link" href="#main">Đến nội dung</a>
+<div class="universe" aria-hidden="true"><div class="static-planet"></div><canvas id="space"></canvas><canvas id="vessel"></canvas><div class="scene-shade"></div><div id="shutter"></div></div>
+<div class="page">
+<header class="masthead">
+<a class="identity" href="/" aria-label="Vũ Việt Dũng — Trang chủ"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2v28M2 16h28M6 6l20 20M6 26L26 6"/><circle cx="16" cy="16" r="8"/></svg><span>VŨ VIỆT DŨNG<small>VẬT LÝ · VIẾT LÁCH · THỬ NGHIỆM</small></span></a>
+<nav aria-label="Điều hướng chính"><a class="story-link" href="/oxytocin/">OXYTOCIN <span aria-hidden="true">↗</span></a><button class="text-button" id="contact-open" aria-haspopup="dialog">Liên lạc <span aria-hidden="true">↗</span></button></nav>
+</header>
+<main id="main">
+<section class="intro" aria-labelledby="hero-title">
+<p class="eyebrow"><span class="status-dot"></span> NHẬT KÝ QUỸ ĐẠO <span class="issue">/ 007</span></p>
+<h1 id="hero-title">Giữa những<br>điều <em>chưa biết.</em></h1>
+<p class="intro-copy">Một góc dành cho vật lý, những câu chuyện,<br class="desktop-break"> và sự tò mò về cách thế giới vận hành.</p>
+<div class="intro-actions"><a class="read-button" href="/oxytocin/"><span>Đọc OXYTOCIN</span><span aria-hidden="true">↗</span></a><button class="board-button" id="board-button"><span class="board-icon" aria-hidden="true">⌑</span> Vào khoang lái</button></div>
+<div class="story-note"><span>01</span> Một câu chuyện về con người.<br><span class="note-line">Và những gì ta nghĩ mình đã hiểu.</span></div>
+</section>
+<aside class="object-caption" aria-label="Thông tin tàu"><span class="crosshair" aria-hidden="true">+</span><span class="caption-rule"></span><div><span class="tiny-label">TÀU KHẢO SÁT CÁ NHÂN</span><strong>VIỄN DU <span>07</span></strong><small>HÀNH TRÌNH VẪN ĐANG TIẾP DIỄN</small></div></aside>
+<section class="pilot-panel" aria-label="Điều khiển khoang lái" hidden><p class="eyebrow"><span class="status-dot"></span> VIỄN DU 07 / KHOANG LÁI</p><h2>Cứ để trí tò mò dẫn đường.</h2><p>Kéo để nhìn quanh · <a href="/oxytocin/">Mở OXYTOCIN ↗</a></p></section>
+<div class="scene-hint" id="scene-hint">Kéo để xoay tàu <span>·</span> Cuộn để đến gần</div><p class="scene-status" id="scene-status" role="status" aria-live="polite"></p>
+</main>
+<footer class="flight-deck">
+<div class="mission-label"><span class="tiny-label">ĐIỂM QUAN SÁT</span><strong>Vành đai phía tối <span>↗</span></strong></div>
+<div class="view-switch" role="group" aria-label="Góc nhìn"><button id="view-exterior" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 18 7v6l-8 5-8-5V7Z M2 7l8 5 8-5M10 12v6"/></svg>Ngoài tàu</button><button id="view-cockpit" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 14V6l7-3 7 3v8M3 9h14M7 5v4m6-4v4M5 16h10"/></svg>Khoang lái</button><kbd>C</kbd></div>
+<div class="utility-controls"><button id="cabin-light" class="icon-button" aria-label="Tắt đèn khoang" aria-pressed="true" title="Đèn khoang"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M8 12v3h4v-3M8 18h4M10 1V0M3 3 2 2m15 1 1-1"/></svg><span>Đèn</span></button><button id="audio-toggle" class="icon-button" aria-label="Bật âm thanh" aria-pressed="false" title="Âm thanh"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h3l4-4v12l-4-4H3ZM14 6q5 4 0 8M13 9q1 1 0 2"/></svg><span>Âm thanh</span></button></div>
+</footer>
+<div class="lower-edge"><span>10°46′ BẮC · 106°41′ ĐÔNG</span><span class="live-message"><i></i> KHÔNG NGỪNG KHÁM PHÁ</span><span>HỒ CHÍ MINH, TRÁI ĐẤT</span></div>
+</div>
+<div class="throttle-panel" hidden><label for="throttle">LỰC ĐẨY <output id="throttle-value" for="throttle">28%</output></label><input type="range" id="throttle" min="0" max="100" value="28" aria-label="Lực đẩy động cơ"><span>TRÔI TỰ DO <span>TOÀN LỰC</span></span></div>
+<dialog id="contact-dialog" aria-labelledby="contact-title"><div class="dialog-top"><span class="eyebrow">KÊNH LIÊN LẠC / 03</span><button id="contact-close" aria-label="Đóng liên lạc">×</button></div><h2 id="contact-title">Gửi một tín hiệu.</h2><p>Một ý tưởng, một câu chuyện,<br>hay đơn giản là một lời chào.</p><a class="contact-row" href="mailto:me@vuvietdung.com"><span><small>EMAIL</small>me@vuvietdung.com</span><span>↗</span></a><a class="contact-row" href="https://github.com/vietdung6" target="_blank" rel="noopener noreferrer"><span><small>GITHUB</small>vietdung6</span><span>↗</span></a><a class="contact-row" href="https://facebook.com/antivietdung" target="_blank" rel="noopener noreferrer"><span><small>FACEBOOK</small>Vũ Việt Dũng</span><span>↗</span></a></dialog>
+<noscript><div class="no-script">Khám phá <a href="/oxytocin/">OXYTOCIN</a> hoặc <a href="mailto:me@vuvietdung.com">gửi email</a>. Bật JavaScript để quan sát con tàu.</div></noscript>
+<script type="module" src="js/app.js"></script>
+</body></html>
