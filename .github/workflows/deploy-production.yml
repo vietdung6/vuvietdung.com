@@ -200,23 +200,40 @@ jobs:
             echo "Probe ${route}: HTTP ${status} (${server:-server unknown})"
           done
 
+          legacy_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
+            --output /dev/null --write-out "%{http_code}" \
+            https://vuvietdung.com/oxytocin/index.php)
+          static_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
+            --output /dev/null --write-out "%{http_code}" \
+            https://vuvietdung.com/oxytocin/v2/reader.css)
+          if [ "$static_code" != 200 ]; then
+            echo "::error::OXYTOCIN v2 static CSS not present (HTTP $static_code)."
+            exit 1
+          fi
+
           v2_code=$(curl --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
             --location --output .deploy/v2-index.html --write-out "%{http_code}" \
             https://vuvietdung.com/oxytocin/v2/index.php)
-          if [ "$v2_code" != 200 ] || ! grep -Fq "OXYTOCIN" .deploy/v2-index.html; then
-            echo "::error::OXYTOCIN v2 reader is not responding correctly (HTTP $v2_code)."
+          if [ "$v2_code" = 403 ] && [ "$legacy_code" = 403 ]; then
+            echo "::warning::Cloudflare gives 403 for BOTH old and new OXYTOCIN PHP URLs to GitHub runners. Static v2 assets are deployed, but PHP runtime must be checked from a normal browser."
+          elif [ "$v2_code" != 200 ] || ! grep -Fq "OXYTOCIN" .deploy/v2-index.html; then
+            echo "::error::OXYTOCIN v2 reader is not responding correctly (HTTP $v2_code); old route HTTP $legacy_code."
             exit 1
+          else
+            echo "OXYTOCIN v2 public reader responds HTTP 200."
           fi
-          echo "OXYTOCIN v2 public reader responds HTTP 200."
 
           admin_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
             --location --output .deploy/v2-admin.html --write-out "%{http_code}" \
             https://vuvietdung.com/oxytocin/v2/admin.php)
-          if [ "$admin_code" != 200 ] || ! grep -Fq "Đăng nhập admin OXYTOCIN" .deploy/v2-admin.html; then
-            echo "::error::OXYTOCIN v2 admin login gateway is not responding correctly (HTTP $admin_code)."
+          if [ "$admin_code" = 403 ] && [ "$legacy_code" = 403 ]; then
+            echo "::warning::Admin PHP is also blocked by Cloudflare to GitHub runners; login must be tested in a normal browser."
+          elif [ "$admin_code" != 200 ] || ! grep -Fq "Đăng nhập admin OXYTOCIN" .deploy/v2-admin.html; then
+            echo "::error::OXYTOCIN v2 admin login gateway did not respond correctly (HTTP $admin_code)."
             exit 1
+          else
+            echo "OXYTOCIN v2 admin login gateway responds HTTP 200."
           fi
-          echo "OXYTOCIN v2 admin login gateway responds HTTP 200."
 
           # Drop the response body. Never log or archive database bytes.
           database_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
