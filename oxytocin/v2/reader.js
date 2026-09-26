@@ -77,7 +77,7 @@
     if (!fullscreenButton) return;
     const active = document.body.classList.contains('reader-immersive');
     fullscreenButton.setAttribute('aria-pressed', String(active));
-    fullscreenButton.textContent = active ? 'Thoát' : 'Toàn màn hình';
+    // Keep the SVG glyphs intact; accessibility labels describe the state.
     fullscreenButton.title = active ? 'Thoát chế độ đọc toàn màn hình' : 'Bật chế độ đọc toàn màn hình';
     fullscreenButton.setAttribute('aria-label', fullscreenButton.title);
   }
