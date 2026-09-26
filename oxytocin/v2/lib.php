@@ -451,7 +451,7 @@ function v2_save_site_settings(PDO $db, array $post): void {
             throw new DomainException('Thiếu dữ liệu cài đặt trang.');
         }
         $value = trim($post[$key]);
-        if (mb_strlen($value, 'UTF-8') > $limit) {
+        if (strlen($value) > $limit * 4) {
             throw new DomainException('Trường ' . $key . ' vượt quá giới hạn ký tự.');
         }
         $values[$key] = $value;
