@@ -12,7 +12,7 @@ import {
    Length 32u, z from -16 to +16
    ============================================================ */
 export const ship = new THREE.Group();
-ship.visible = false;
+ship.visible = true;
 scene.add(ship);
 
 const engineGlowMeshes = [];
@@ -126,6 +126,36 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
     opacity: 0.42,
     side: THREE.DoubleSide,
     depthWrite: false
+  });
+
+  /* --- FORWARD PRESSURE HULL ---
+     Broad blended body under the canopy: the cockpit is carved into the
+     vessel rather than sitting on a separate pedestal. */
+  const pressureHull = new THREE.Mesh(
+    new THREE.CylinderGeometry(3.05, 2.65, 6.2, 24),
+    hullMat
+  );
+  pressureHull.geometry.rotateX(Math.PI / 2);
+  pressureHull.position.set(0, 0.10, -7.3);
+  pressureHull.scale.set(1.0, 0.70, 1.0);
+  ship.add(pressureHull);
+
+  /* shoulder chines visually carry the canopy into the main fuselage */
+  [-1, 1].forEach(side => {
+    const chine = new THREE.Mesh(
+      new THREE.BoxGeometry(1.15, 0.70, 6.0),
+      hullMat
+    );
+    chine.position.set(side * 2.45, 1.05, -6.9);
+    chine.rotation.z = -side * 0.15;
+    ship.add(chine);
+
+    const chineInset = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.18, 4.8),
+      hullDarkMat
+    );
+    chineInset.position.set(side * 2.92, 1.10, -6.9);
+    ship.add(chineInset);
   });
 
   /* --- HULL BASE (giữ nguyên như cũ) --- */
