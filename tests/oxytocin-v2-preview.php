@@ -13,10 +13,9 @@ try {
     $db = null;
     $before = hash_file('sha256',$path);
     $_SERVER['REQUEST_METHOD'] = 'POST';
-    session_name('oxy_v2_admin');
     session_start();
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
-    $_SESSION['v2_authenticated'] = true;
+    $_SESSION['admin'] = true;
     $token = $_SESSION['csrf'];
     session_write_close();
     $_POST = [
