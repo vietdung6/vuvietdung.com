@@ -22,7 +22,7 @@ v2_reader_breadcrumb([
     <?php if ($arc['intro']): ?><p class="page-intro"><?= nl2br(v2_h($arc['intro'])) ?></p><?php endif; ?>
 </header>
 <nav class="mini-toc v2-arc-shelf" aria-label="Danh sách tập">
-    <div class="mini-toc-label">Danh sách tập · <?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?></div>
+    <div class="mini-toc-label">Danh sách tập</div>
     <div class="episode-cards">
         <?php foreach ($arc['episodes'] as $episode): ?>
         <a class="episode-card" href="episode.php?id=<?= $episode['id'] ?>">
