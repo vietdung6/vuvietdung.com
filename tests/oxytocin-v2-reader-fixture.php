@@ -32,4 +32,7 @@ $hiddenEp=fixture_insert($db,'episodes',['arc_id'=>(string)$hiddenArc,'ep_num'=>
     'title_en'=>'Locked','title_vi'=>'Đóng','summary'=>'','intro'=>'']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$hiddenEp,'title'=>'Ẩn',
     'content'=>'SECRET_HIDDEN_SHOULD_NOT_LEAK','content_format'=>'html','action'=>'save_publish']);
-echo "Seeded disposable HTTP fixture (three published chapters, one draft, one hidden).\n";
+fixture_insert($db,'parts',['part_num'=>'2','badge'=>'Phần mới',
+    'title_en'=>'UPCOMING_EMPTY_PART','title_vi'=>'Phần mới chưa có chương',
+    'description'=>'','status'=>'active']);
+echo "Seeded disposable HTTP fixture (three published chapters, one draft, one hidden and one empty active Part).\n";
