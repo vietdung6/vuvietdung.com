@@ -9,8 +9,7 @@ cleanup() {
 trap cleanup EXIT
 
 export OXYTOCIN_V2_DB_PATH="$test_dir/oxytocin_v2.db"
-php oxytocin/v2/init.php >/dev/null
-php tests/oxytocin-v2-reader-fixture.php >/dev/null
+test ! -e "$OXYTOCIN_V2_DB_PATH"
 php -S 127.0.0.1:18176 -t . >"$test_dir/server.log" 2>&1 &
 server_pid="$!"
 base="http://127.0.0.1:18176/oxytocin/v2"
@@ -19,6 +18,15 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
   sleep 1
 done
 test -s "$test_dir/index.html"
+grep -q 'Chưa có chương nào được xuất bản' "$test_dir/index.html"
+test -f "$OXYTOCIN_V2_DB_PATH"
+php -r '
+  $db = new PDO("sqlite:" . getenv("OXYTOCIN_V2_DB_PATH"));
+  if ((int)$db->query("PRAGMA user_version")->fetchColumn() !== 2) exit(1);
+  if ((int)$db->query("SELECT COUNT(*) FROM chapters")->fetchColumn() !== 0) exit(2);
+'
+php tests/oxytocin-v2-reader-fixture.php >/dev/null
+curl -fsS "$base/index.php" >"$test_dir/index.html"
 
 curl -fsS "$base/part.php?id=1" >"$test_dir/part.html"
 curl -fsS "$base/arc.php?id=1" >"$test_dir/arc.html"
