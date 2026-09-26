@@ -3,26 +3,50 @@ declare(strict_types=1);
 require_once __DIR__ . '/render.php';
 
 /**
- * OXYTOCIN v2: isolated database and explicit CRUD operations.
- * Never connects to ../oxytocin.db, and never initializes a database during a web request.
+ * SQLite v2 is independent of oxytocin.db. On cPanel it starts empty on the
+ * first request, without a MySQL/phpMyAdmin or PHP-FPM configuration step.
+ * A custom absolute DB path is still supported for tests and advanced hosting.
  */
 function v2_path(): string {
-    $configured = getenv('OXYTOCIN_V2_DB_PATH');
-    if (!is_string($configured) || $configured === '' || $configured[0] !== '/') {
-        throw new RuntimeException('Chưa cấu hình OXYTOCIN_V2_DB_PATH (đường dẫn tuyệt đối).');
+    $override = getenv('OXYTOCIN_V2_DB_PATH');
+    $automatic = !is_string($override) || $override === '';
+    $requested = $automatic ? __DIR__ . '/.data/oxytocin_v2.db' : $override;
+
+    if ($requested[0] !== '/') {
+        throw new RuntimeException('Đường dẫn SQLite tùy chỉnh phải là đường dẫn tuyệt đối.');
     }
-    $parent = realpath(dirname($configured));
+
+    $directory = dirname($requested);
+    if ($automatic && !is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory)) {
+        throw new RuntimeException('Không tạo được thư mục SQLite v2.');
+    }
+    $parent = realpath($directory);
     if ($parent === false) {
-        throw new RuntimeException('Thư mục dữ liệu chưa tồn tại.');
+        throw new RuntimeException('Thư mục SQLite không tồn tại.');
     }
-    $path = realpath($configured) ?: $parent . DIRECTORY_SEPARATOR . basename($configured);
-    $publicRoot = realpath(dirname(__DIR__, 2));
-    if ($publicRoot !== false && ($path === $publicRoot || str_starts_with($path, $publicRoot . DIRECTORY_SEPARATOR))) {
-        throw new RuntimeException('Database phải nằm ngoài thư mục website.');
-    }
+    $path = realpath($requested) ?: $parent . DIRECTORY_SEPARATOR . basename($requested);
+
     $old = realpath(dirname(__DIR__) . '/oxytocin.db');
     if ($old !== false && $path === $old) {
         throw new RuntimeException('Không được sử dụng database cũ.');
+    }
+
+    if ($automatic) {
+        $guard = $parent . '/.htaccess';
+        // The in-site default is only permitted inside its own denied folder.
+        if ($parent !== realpath(__DIR__ . '/.data') ||
+            !is_file($guard) ||
+            !str_contains((string)file_get_contents($guard), 'Require all denied')) {
+            throw new RuntimeException('SQLite v2 chưa có bảo vệ truy cập web.');
+        }
+        @chmod($parent, 0700);
+    } else {
+        // Custom paths must stay outside the checked-out website.
+        $publicRoot = realpath(dirname(__DIR__, 2));
+        if ($publicRoot !== false &&
+            ($path === $publicRoot || str_starts_with($path, $publicRoot . DIRECTORY_SEPARATOR))) {
+            throw new RuntimeException('Đường dẫn tùy chỉnh phải ở ngoài website.');
+        }
     }
     return $path;
 }
@@ -38,44 +62,72 @@ function v2_connect(string $path): PDO {
     return $db;
 }
 
+/**
+ * Initialize only an EMPTY v2 database. A nonempty unknown schema is never
+ * changed or overwritten. BEGIN IMMEDIATE serializes simultaneous first hits.
+ */
+function v2_initialize_schema(PDO $db): void {
+    $db->exec('BEGIN IMMEDIATE');
+    try {
+        $version = (int)$db->query('PRAGMA user_version')->fetchColumn();
+        if ($version === 0) {
+            $hasTables = (int)$db->query(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )->fetchColumn();
+            if ($hasTables !== 0) {
+                throw new RuntimeException('File SQLite đã có dữ liệu hoặc cấu trúc khác; không tự ghi đè.');
+            }
+            $sql = file_get_contents(__DIR__ . '/schema.sql');
+            if (!is_string($sql) || $sql === '') {
+                throw new RuntimeException('Không tìm thấy schema SQLite v2.');
+            }
+            $db->exec($sql);
+        } elseif ($version !== 2) {
+            throw new RuntimeException('Phiên bản database v2 không tương thích.');
+        }
+        if ((int)$db->query('PRAGMA user_version')->fetchColumn() !== 2) {
+            throw new RuntimeException('Không thể khởi tạo schema SQLite v2.');
+        }
+        $db->exec('COMMIT');
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) $db->exec('ROLLBACK');
+        throw $e;
+    }
+}
+
 function v2_db(): PDO {
     $path = v2_path();
     if (!is_file($path)) {
-        throw new RuntimeException('Database v2 chưa được khởi tạo. Không tự tạo dữ liệu rỗng.');
+        // Exclusive creation prevents clobbering an existing database.
+        $created = @fopen($path, 'x');
+        if ($created !== false) {
+            @chmod($path, 0600);
+            fclose($created);
+        } elseif (!is_file($path)) {
+            throw new RuntimeException('Không thể tạo database SQLite v2.');
+        }
     }
     $db = v2_connect($path);
-    if ((int) $db->query('PRAGMA user_version')->fetchColumn() !== 2) {
-        throw new RuntimeException('Sai phiên bản database v2.');
+    $version = (int)$db->query('PRAGMA user_version')->fetchColumn();
+    if ($version === 0) {
+        v2_initialize_schema($db);
+    } elseif ($version !== 2) {
+        throw new RuntimeException('Phiên bản database v2 không tương thích.');
     }
     return $db;
 }
 
+/** Optional CLI helper; web requests do not need to run it. */
 function v2_init(): string {
     if (PHP_SAPI !== 'cli') {
         throw new RuntimeException('Chỉ khởi tạo bằng PHP CLI.');
     }
     $path = v2_path();
-    $handle = @fopen($path, 'x');
-    if ($handle === false) {
-        throw new RuntimeException('File đã tồn tại: không ghi đè database.');
+    if (file_exists($path)) {
+        throw new RuntimeException('Database đã tồn tại; không ghi đè.');
     }
-    fclose($handle);
-    @chmod($path, 0600);
-    try {
-        $db = v2_connect($path);
-        $sql = file_get_contents(__DIR__ . '/schema.sql');
-        if ($sql === false) {
-            throw new RuntimeException('Không tìm được schema.sql');
-        }
-        $db->exec($sql);
-        if ($db->query('PRAGMA integrity_check')->fetchColumn() !== 'ok') {
-            throw new RuntimeException('Kiểm tra tính toàn vẹn thất bại.');
-        }
-        $db = null;
-    } catch (Throwable $e) {
-        @unlink($path);
-        throw $e;
-    }
+    $db = v2_db();
+    $db = null;
     return $path;
 }
 
