@@ -114,17 +114,20 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
 (function buildCanopy() {
   const CY = 2.55, CZ = -8.0;
 
-  /* Glass tint đậm cho exterior */
+  /* Light cyan canopy glass — transparent enough to read the cockpit from outside */
   const glassExteriorMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0a1520,
-    roughness: 0.08,
-    metalness: 0.6,
-    emissive: 0x0a1a2a,
-    emissiveIntensity: 0.25,
+    color: 0x8fefff,
+    roughness: 0.10,
+    metalness: 0.08,
+    transmission: 0.72,
     transparent: true,
-    opacity: 0.88,
+    opacity: 0.32,
+    ior: 1.32,
+    thickness: 0.10,
     clearcoat: 1.0,
-    clearcoatRoughness: 0.05
+    clearcoatRoughness: 0.04,
+    side: THREE.DoubleSide,
+    depthWrite: false
   });
 
   /* --- HULL BASE (giữ nguyên như cũ) --- */
@@ -203,48 +206,66 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
   });
 
   /* ============================================================
-     2 SIDE WALLS của canopy (tường đặc, tạo khối kín)
+     SIDE CANOPY — structural rails + transparent side glazing
      ============================================================ */
   [-1, 1].forEach(side => {
-    const wall = new THREE.Mesh(
-      new THREE.BoxGeometry(0.40, 2.0, 3.9),
+    const sideX = side * 3.28;
+
+    const upperRail = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.26, 3.9),
       hullMat
     );
-    wall.position.set(side * 3.35, CY - 0.10, CZ + 1.9);
-    ship.add(wall);
+    upperRail.position.set(sideX, CY + 0.78, CZ + 1.9);
+    ship.add(upperRail);
+
+    const lowerRail = new THREE.Mesh(
+      new THREE.BoxGeometry(0.30, 0.30, 3.9),
+      hullMat
+    );
+    lowerRail.position.set(sideX, CY - 0.83, CZ + 1.9);
+    ship.add(lowerRail);
+
+    const rearPost = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 1.75, 0.32),
+      hullMat
+    );
+    rearPost.position.set(sideX, CY - 0.03, CZ + 3.68);
+    ship.add(rearPost);
+
+    const sideGlass = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.35, 1.38),
+      glassExteriorMat
+    );
+    sideGlass.position.set(side * 3.11, CY - 0.02, CZ + 1.90);
+    sideGlass.rotation.y = side * Math.PI / 2;
+    ship.add(sideGlass);
 
     const wallInnerGlow = new THREE.Mesh(
-      new THREE.BoxGeometry(0.05, 1.9, 3.9),
+      new THREE.BoxGeometry(0.05, 0.05, 3.65),
       accentCyanMat
     );
-    wallInnerGlow.position.set(side * 3.12, CY - 0.10, CZ + 1.9);
+    wallInnerGlow.position.set(side * 3.08, CY + 0.68, CZ + 1.9);
     ship.add(wallInnerGlow);
-
-    const wallOuterEdge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.05, 1.9, 3.9),
-      accentGoldMat
-    );
-    wallOuterEdge.position.set(side * 3.58, CY - 0.10, CZ + 1.9);
-    ship.add(wallOuterEdge);
   });
 
   /* ============================================================
      ROOF + REAR BULKHEAD — close the raised cockpit into one sealed module
      ============================================================ */
   const canopyRoof = new THREE.Mesh(
-    new THREE.BoxGeometry(6.55, 0.34, 3.75),
+    new THREE.BoxGeometry(6.55, 0.28, 3.75),
     hullMat
   );
   canopyRoof.position.set(0, CY + 1.02, CZ + 1.72);
   ship.add(canopyRoof);
 
-  /* dark inset keeps the roof from reading like one flat slab */
-  const roofInset = new THREE.Mesh(
-    new THREE.BoxGeometry(4.9, 0.06, 2.9),
-    hullDarkMat
+  /* top skylight: same cyan glass language as the windscreen */
+  const roofGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.55, 2.55),
+    glassExteriorMat
   );
-  roofInset.position.set(0, CY + 1.205, CZ + 1.78);
-  ship.add(roofInset);
+  roofGlass.rotation.x = -Math.PI / 2;
+  roofGlass.position.set(0, CY + 1.17, CZ + 1.68);
+  ship.add(roofGlass);
 
   /* rear pressure bulkhead closes the canopy against the mid hull */
   const rearBulkhead = new THREE.Mesh(
@@ -271,6 +292,77 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
     shoulder.rotation.z = -side * 0.12;
     ship.add(shoulder);
   });
+
+  /* ============================================================
+     LOWER PRESSURE DECK — seals the cockpit underside
+     ============================================================ */
+  const cockpitDeck = new THREE.Mesh(
+    new THREE.BoxGeometry(6.55, 0.30, 3.95),
+    hullMat
+  );
+  cockpitDeck.position.set(0, CY - 1.02, CZ + 1.78);
+  ship.add(cockpitDeck);
+
+  const bellyInset = new THREE.Mesh(
+    new THREE.BoxGeometry(4.7, 0.06, 3.15),
+    hullDarkMat
+  );
+  bellyInset.position.set(0, CY - 1.19, CZ + 1.82);
+  ship.add(bellyInset);
+
+  /* ============================================================
+     VISIBLE EXTERIOR COCKPIT INTERIOR
+     Minimal geometry sits inside the transparent canopy so exterior
+     view reads as a real occupied pressure cabin instead of an empty shell.
+     ============================================================ */
+  const extInterior = new THREE.Group();
+  ship.add(extInterior);
+
+  const extFloor = new THREE.Mesh(
+    new THREE.BoxGeometry(5.6, 0.12, 3.2),
+    hullDarkMat
+  );
+  extFloor.position.set(0, CY - 0.78, CZ + 1.72);
+  extInterior.add(extFloor);
+
+  const extDash = new THREE.Mesh(
+    new THREE.BoxGeometry(4.9, 0.55, 0.70),
+    hullDarkMat
+  );
+  extDash.position.set(0, CY - 0.38, CZ + 0.48);
+  extDash.rotation.x = -0.16;
+  extInterior.add(extDash);
+
+  const extScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.35, 0.48),
+    new THREE.MeshBasicMaterial({
+      color: 0x7ff5ff,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide
+    })
+  );
+  extScreen.position.set(0, CY - 0.20, CZ + 0.10);
+  extScreen.rotation.x = -0.16;
+  extInterior.add(extScreen);
+
+  const extSeatBack = new THREE.Mesh(
+    new THREE.BoxGeometry(1.65, 1.55, 0.28),
+    hullDarkMat
+  );
+  extSeatBack.position.set(0, CY - 0.03, CZ + 2.48);
+  extInterior.add(extSeatBack);
+
+  const extHeadrest = new THREE.Mesh(
+    new THREE.BoxGeometry(1.05, 0.38, 0.30),
+    hullDarkMat
+  );
+  extHeadrest.position.set(0, CY + 0.82, CZ + 2.48);
+  extInterior.add(extHeadrest);
+
+  const cabinLight = new THREE.PointLight(0x9eefff, 4.0, 7.0, 2);
+  cabinLight.position.set(0, CY + 0.45, CZ + 1.35);
+  extInterior.add(cabinLight);
 
   /* ============================================================
      FRONT TOP FRAME
