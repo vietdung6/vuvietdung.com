@@ -9,7 +9,8 @@
   const episode = form.querySelector('[name="episode_id"]');
   const format = form.querySelector('[name="content_format"]').value;
   const shell = document.getElementById('editorShell');
-  const key = 'oxytocin:v2:chapter:' + (form.querySelector('[name="id"]').value || 'new');
+  const chapterId = form.querySelector('[name="id"]').value;
+  const key = 'oxytocin:v2:chapter:' + (chapterId === '0' || chapterId === '' ? 'new' : chapterId);
   const pendingKey = 'oxytocin:v2:pending';
   const status = document.getElementById('autosaveStatus');
   const recovery = document.getElementById('recoveryBanner');
