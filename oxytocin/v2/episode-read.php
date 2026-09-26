@@ -55,4 +55,4 @@ v2_reader_breadcrumb([
     <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">Chương sau tập</span><span class="nav-name">Đã hết chương được đăng</span></span><?php endif; ?>
 </nav>
 <div class="v2-backlinks"><a href="episode.php?id=<?= $id ?>">Danh sách chương tập <?= $episode['num'] ?></a><a href="index.php">Mục lục</a></div>
-<?php v2_reader_close(); ?>
+<?php v2_reader_close(true); ?>
