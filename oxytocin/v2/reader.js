@@ -47,7 +47,7 @@
       ? 'episode-read.php?id=' + saved.episodeId
       : 'chapter.php?id=' + saved.chapterId;
     continueLink.hidden = false;
-    continueLink.textContent = 'Đọc tiếp ↗';
+    continueLink.textContent = 'Đọc tiếp';
   }
   const rememberedTheme = get(themeKey);
   if (rememberedTheme === 'light') document.body.classList.add('theme-light');
