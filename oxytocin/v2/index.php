@@ -25,7 +25,7 @@ v2_reader_open($site['site_title'] ?: 'OXYTOCIN', 'home');
 <?php endif; ?>
 <nav class="arc-nav v2-library" aria-labelledby="toc-title">
     <div class="v2-library-heading">
-        <span class="v2-library-eyebrow">OXYTOCIN · DANH SÁCH PHẦN</span>
+        <div class="v2-library-upper"><span class="v2-library-eyebrow">OXYTOCIN · DANH SÁCH PHẦN</span><a href="index.php" class="v2-continue" id="continueReading" hidden>Đọc tiếp</a></div>
         <h2 class="v2-library-title" id="toc-title">Mục lục</h2>
         <div class="v2-library-rule" aria-hidden="true"></div>
     </div>
