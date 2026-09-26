@@ -214,8 +214,11 @@ try {
   await admin.locator('button[name="chapter_intent"][value="save_publish"]').click();
   await admin.waitForURL(/saved=1/);
   await page.reload();
+  assert(!(await page.content()).includes('BROWSER_DRAFT'),
+    'Home stays a Part-only index, even after another chapter is published');
+  await page.goto(at('episode.php?id=1'));
   assert((await page.content()).includes('BROWSER_DRAFT'),
-    'Explicit publication remains visible in the linked Part navigation');
+    'Published chapter appears in its separate Episode page');
   const exposed = await page.request.get(at('chapter.php?id=' + id));
   assert.equal(exposed.status(), 200);
   assert((await exposed.text()).includes('BROWSER_DRAFT_EDITOR'));
