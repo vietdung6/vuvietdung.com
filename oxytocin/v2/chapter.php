@@ -46,4 +46,4 @@ v2_reader_breadcrumb([
     <a href="episode.php?id=<?= $episode['id'] ?>">Trang tập <?= $episode['num'] ?></a>
     <a href="episode-read.php?id=<?= $episode['id'] ?>">Đọc toàn bộ tập</a>
 </div>
-<?php v2_reader_close(); ?>
+<?php v2_reader_close(true); ?>

@@ -95,6 +95,14 @@ try {
   await page.locator('a.reader-primary').click();
   assert.equal(await page.locator('section.v2-full-chapter').count(), 2,
     'Full episode shows two published chapters');
+  assert.equal(await page.locator('.v2-chapter-divider').count(), 1,
+    'Exactly one understated rule separates two chapters');
+  assert.equal(await page.locator('.v2-full-heading').count(), 0,
+    'Continuous reading does not repeat large chapter headers');
+  assert.equal(await page.locator('section.v2-full-chapter[aria-label^="Chương"]').count(), 2,
+    'Chapter boundaries remain accessible for assistive technology');
+  assert.equal(await page.locator('.v2-chapter-divider').evaluate(node =>
+    getComputedStyle(node).height), '1px', 'Chapter separator is a hairline');
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_ONE_UNIQUE' }).count(), 1);
   assert.equal(await page.locator('article').filter({ hasText: 'PUBLIC_TWO_UNIQUE' }).count(), 1);
   assert(!(await page.content()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
@@ -112,8 +120,10 @@ try {
     dispatchEvent(new Event('scroll'));
   });
   await page.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
-  assert.equal(await page.locator('.reader-tools svg').count(), 0,
-    'Reading controls use text, never decorative icons');
+  assert.equal(await page.locator('.reader-tools svg').count(), 6,
+    'All reading icons live exclusively inside the four floating controls');
+  assert.equal(await page.locator('svg:not(.reader-tools svg)').count(), 0,
+    'No icons appear in titles, cards, breadcrumbs or other reader UI');
   await page.locator('#readerTheme').click();
   await page.locator('#readerFont').click();
   await page.goto(at('chapter.php?id=1'));
@@ -133,12 +143,18 @@ try {
   assert.equal(await page.locator('#readerFullscreen').getAttribute('aria-pressed'), 'true');
   assert.equal(await page.locator('.reader-topbar').evaluate(node => getComputedStyle(node).display), 'none',
     'Fullscreen hides non-reading navigation');
-  assert.equal(await page.locator('.reader-tools svg').count(), 0,
-    'Fullscreen adds no new icons');
+  assert.equal(await page.locator('.reader-tools svg').count(), 6,
+    'Fullscreen changes the visible glyph without creating additional icons');
+  assert.equal(await page.locator('.icon-expand').evaluate(node => getComputedStyle(node).display),
+    'none', 'Expanded reader displays the collapse glyph');
+  assert.equal(await page.locator('.icon-collapse').evaluate(node => getComputedStyle(node).display),
+    'block');
   await page.locator('#readerFullscreen').click();
   await page.waitForFunction(() => !document.fullscreenElement);
   assert(!await page.locator('body').evaluate(node => node.classList.contains('reader-immersive')),
     'Reader exits fullscreen without changing saved font or theme');
+  assert.equal(await page.locator('.icon-expand').evaluate(node => getComputedStyle(node).display),
+    'block', 'Normal mode restores the expand glyph');
 
   // Restore reading position in the second chapter of full-episode mode.
   await page.goto(at('episode-read.php?id=1'));
@@ -283,6 +299,10 @@ try {
     dispatchEvent(new Event('scroll'));
   });
   await mobile.waitForFunction(() => document.querySelector('.reader-tools')?.classList.contains('visible'));
+  assert.equal(await mobile.locator('.reader-tools button, .reader-tools a').count(), 4,
+    'Mobile reading controls have four compact circular actions');
+  assert.equal(await mobile.locator('svg:not(.reader-tools svg)').count(), 0,
+    'Mobile navigation outside reading controls stays icon-free');
   await mobile.locator('#readerFont').click();
   assert(await mobile.locator('body').evaluate(node => node.classList.contains('font-large')));
   // Force the no-Fullscreen-API path (e.g. iPhone Safari) in mobile Chromium.

@@ -145,15 +145,23 @@ function v2_reader_open(string $title, string $mode = '', int $chapterId = 0, in
     echo '<main class="container v2-main">';
 }
 
-function v2_reader_close(): void {
+function v2_reader_close(bool $withReadingControls = false): void {
     echo '<footer class="v2-footer"><div class="signature">VVD WORKS</div>'
-        . '<p>© OXYTOCIN</p></footer></main>'
-        . '<nav class="reader-tools" aria-label="Điều khiển đọc">'
-        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối" aria-pressed="false">Nền</button>'
-        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ">A+</button>'
-        . '<a href="index.php" title="Về mục lục">Mục lục</a>'
-        . '<button type="button" id="readerFullscreen" title="Bật chế độ đọc toàn màn hình" aria-label="Bật chế độ đọc toàn màn hình" aria-pressed="false">Toàn màn hình</button></nav>'
-        . '<div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>'
+        . '<p>© OXYTOCIN</p></footer></main>';
+    if ($withReadingControls) {
+        echo '<nav class="reader-tools" aria-label="Điều khiển đọc">'
+        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối" aria-pressed="false">'
+        . '<svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>'
+        . '<svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.1A9 9 0 0 1 9.9 3.2a9 9 0 1 0 10.9 10.9Z"/></svg></button>'
+        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ">'
+        . '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 19 5.5-14 5.5 14m-9.7-4h8.4M16 9h5m-2.5-2.5v5"/></svg></button>'
+        . '<a href="index.php" title="Về mục lục" aria-label="Về mục lục">'
+        . '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h16M4 20h11"/></svg></a>'
+        . '<button type="button" id="readerFullscreen" title="Bật chế độ đọc toàn màn hình" aria-label="Bật chế độ đọc toàn màn hình" aria-pressed="false">'
+        . '<svg class="icon-expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>'
+        . '<svg class="icon-collapse" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h5V3m13 5h-5V3M3 16h5v5m13-5h5v5"/></svg></button></nav>';
+    }
+    echo '<div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>'
         . '</body></html>';
 }
 
