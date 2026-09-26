@@ -1,3 +1,8 @@
 node_modules/
 .preview/
 .deploy/
+
+# OXYTOCIN runtime databases, WAL/SHM and local config
+/oxytocin/v2/.data/*
+!/oxytocin/v2/.data/.htaccess
+/oxytocin/v2/config.local.php

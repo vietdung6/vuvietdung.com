@@ -1,0 +1,8 @@
+.preview-notice{margin:0 auto 20px;padding:10px 15px;border:1px solid #8d7047;background:#332719;color:#e6ce9d;text-align:center;font:12px/1.5 system-ui,sans-serif;letter-spacing:.03em}
+.episode-body strong,.episode-body .highlight-bright{color:var(--text-bright);font-weight:600}
+.episode-body .highlight-red{color:#e53935;font-weight:600}
+.episode-body p.center-red{color:#e53935;text-indent:0;text-align:center;font-weight:600}
+.episode-body p.beat{color:var(--gold);text-indent:0;text-align:center;font-weight:600}
+.episode-body p.scene-break{color:var(--gold);text-indent:0;text-align:center;letter-spacing:10px;margin:40px 0}
+.episode-body p.scene-break:first-of-type::first-letter{font-size:inherit;float:none;font-family:inherit;color:inherit;margin:0;line-height:inherit}
+@media(max-width:700px){.preview-notice{font-size:11px}.episode-header-page{padding-top:26px}}

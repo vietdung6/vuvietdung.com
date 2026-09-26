@@ -1,0 +1,2 @@
+# OXYTOCIN v2 private SQLite directory. Apache/LiteSpeed: never serve these files.
+Require all denied

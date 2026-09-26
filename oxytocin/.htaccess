@@ -1,0 +1,4 @@
+# OXYTOCIN: Apache / LiteSpeed must never serve SQLite databases, journals or private configuration.
+<FilesMatch "(?i)^(?:.+\.(?:db|sqlite|sqlite3)(?:-(?:wal|shm|journal))?|error_log|\.env(?:\..+)?)$">
+    Require all denied
+</FilesMatch>
