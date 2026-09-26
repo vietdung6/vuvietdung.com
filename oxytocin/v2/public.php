@@ -135,22 +135,23 @@ function v2_reader_open(string $title, string $mode = '', int $chapterId = 0, in
         . '<link rel="stylesheet" href="reader.css?v=' . filemtime(__DIR__ . '/reader.css') . '">'
         . '<script src="reader.js?v=' . filemtime(__DIR__ . '/reader.js') . '" defer></script>'
         . '</head><body data-reader-mode="' . v2_h($mode) . '"'
-        . ' data-reader-chapter="' . $chapterId . '" data-reader-episode="' . $episodeId . '">'
-        . '<div class="reader-topbar"><a class="reader-logo" href="index.php">OXYTOCIN</a>'
-        . '<nav aria-label="Điều hướng"><a href="index.php">Mục lục</a>'
-        . '<a href="index.php" id="continueReading" hidden>Đọc tiếp ↗</a></nav></div>'
-        . '<main class="container v2-main">';
+        . ' data-reader-chapter="' . $chapterId . '" data-reader-episode="' . $episodeId . '">';
+    if ($mode !== 'home') {
+        echo '<nav class="reader-topbar" aria-label="Điều hướng chính">'
+            . '<a class="reader-logo" href="index.php">OXYTOCIN</a>'
+            . '<span class="reader-topbar-links"><a href="index.php">Mục lục</a>'
+            . '<a href="index.php" id="continueReading" hidden>Đọc tiếp</a></span></nav>';
+    }
+    echo '<main class="container v2-main">';
 }
 
 function v2_reader_close(): void {
-    echo '<footer class="v2-footer"><div class="signature">✦ VVD WORKS ✦</div>'
+    echo '<footer class="v2-footer"><div class="signature">VVD WORKS</div>'
         . '<p>© OXYTOCIN</p></footer></main>'
-        . '<div class="reader-tools" aria-label="Tùy chỉnh việc đọc">'
-        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối">'
-        . '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.8A8.7 8.7 0 0 1 8.2 3.8 8.7 8.7 0 1 0 20.2 15.8Z"/></svg></button>'
-        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ"><span class="reader-font-glyph" aria-hidden="true">Aa<sup>+</sup></span></button>'
-        . '<a href="index.php" title="Về mục lục" aria-label="Về mục lục">'
-        . '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></a></div>'
+        . '<nav class="reader-tools" aria-label="Tùy chỉnh việc đọc">'
+        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối">Nền</button>'
+        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ">Cỡ chữ</button>'
+        . '<a href="index.php">Mục lục</a></nav>'
         . '<div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>'
         . '</body></html>';
 }
@@ -159,7 +160,7 @@ function v2_reader_breadcrumb(array $segments): void {
     echo '<nav class="breadcrumb v2-breadcrumb" aria-label="Vị trí trong truyện">'
         . '<a href="index.php">Mục lục</a>';
     foreach ($segments as $segment) {
-        echo '<span class="breadcrumb-sep">›</span>';
+        echo '<span class="breadcrumb-sep" aria-hidden="true">/</span>';
         if (isset($segment['href'])) {
             echo '<a class="breadcrumb-link" href="' . v2_h($segment['href']) . '">'
                 . v2_h($segment['label']) . '</a>';
@@ -175,7 +176,7 @@ function v2_reader_not_found(): never {
     v2_reader_open('Không tìm thấy nội dung');
     echo '<section class="reader-empty"><h1>Không tìm thấy nội dung</h1>'
         . '<p>Trang này không tồn tại hoặc chưa được xuất bản.</p>'
-        . '<p><a href="index.php">← Về mục lục</a></p></section>';
+        . '<p><a href="index.php">Về mục lục</a></p></section>';
     v2_reader_close();
     exit;
 }
