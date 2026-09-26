@@ -59,11 +59,27 @@ try {
 
   await page.goto(at('index.php'));
   assert.equal(await page.locator('.outline-part').count(), 1, 'Outline hides coming-soon parts');
+  // The v2 reader inherits the original OXYTOCIN cover, not generic nested panels.
+  assert.equal(await page.locator('.home-grid > .v2-part-card > .arc-card').count(), 1,
+    'Homepage uses the original paired cover-card treatment');
+  assert((await page.locator('.v2-part-summary .arc-card-title').evaluate(node =>
+    getComputedStyle(node).fontFamily)).includes('Cinzel'),
+    'Original Cinzel cover typography is restored');
+  assert.equal(await page.locator('.v2-parts-grid').evaluate(node =>
+    getComputedStyle(node).display), 'grid');
+  assert.equal(await page.locator('.reader-tools button svg').count(), 1,
+    'Reader theme control uses a quiet icon, not a chunky text button');
   await page.locator('.outline-part > summary').click();
   await page.locator('.outline-arc > summary').click();
   assert.equal(await page.locator('.chapter-links a').count(), 3, 'Nested table of contents');
   assert(!await page.locator('body').innerText().then(s => s.includes('SECRET_DRAFT_SHOULD_NOT_LEAK')));
 
+  await page.goto(at('part.php?id=1'));
+  assert.equal(await page.locator('.v2-arc-shelf .episode-card').count(), 2,
+    'Part page retains both episode links as original-style cards');
+  await page.goto(at('arc.php?id=1'));
+  assert.equal(await page.locator('.episode-cards .episode-card').count(), 2,
+    'Arc page retains the original episode grid');
   await page.goto(at('episode.php?id=1'));
   assert.equal(await page.locator('.chapter-list a').count(), 2, 'Episode lists only published chapters');
   await page.locator('a.reader-primary').click();
