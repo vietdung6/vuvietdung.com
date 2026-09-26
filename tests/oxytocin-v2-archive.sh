@@ -3,7 +3,7 @@ set -euo pipefail
 site="${1:?Usage: bash tests/oxytocin-v2-archive.sh /path/to/staged-site}"
 test -d "$site"
 
-for required in   'oxytocin/.htaccess'   'oxytocin/v2/.htaccess'   'oxytocin/v2/index.php'   'oxytocin/v2/admin.php'   'oxytocin/v2/chapter.php'   'oxytocin/v2/episode.php'   'oxytocin/v2/episode-read.php'   'oxytocin/v2/reader.js'   'oxytocin/v2/reader.css'   'oxytocin/index.php'   'oxytocin/read.php'   'index.html'; do
+for required in   'oxytocin/.htaccess'   'oxytocin/v2/.htaccess'   'oxytocin/v2/.data/.htaccess'   'oxytocin/v2/index.php'   'oxytocin/v2/admin.php'   'oxytocin/v2/chapter.php'   'oxytocin/v2/episode.php'   'oxytocin/v2/episode-read.php'   'oxytocin/v2/reader.js'   'oxytocin/v2/reader.css'   'oxytocin/index.php'   'oxytocin/read.php'   'index.html'; do
   if [[ ! -f "$site/$required" ]]; then
     echo "FAIL: missing deployment file: $required" >&2
     exit 1
@@ -18,7 +18,7 @@ if find "$site/oxytocin" -type f \(   -iname '*.db' -o -iname '*.db-wal' -o -ina
 fi
 
 # Existing URLs must still be present in the archive; v2 is additive.
-if [[ -e "$site/oxytocin/oxytocin.db" ]]; then
+if [[ -e "$site/oxytocin/oxytocin.db" ]] || [[ -e "$site/oxytocin/v2/.data/oxytocin_v2.db" ]]; then
   echo 'FAIL: legacy SQLite appears in site archive' >&2
   exit 1
 fi
