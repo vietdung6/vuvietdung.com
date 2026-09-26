@@ -6,6 +6,9 @@ on:
       - 'tests/oxytocin-v2.php'
       - 'tests/oxytocin-v2-editor.php'
       - 'tests/oxytocin-v2-preview.php'
+      - 'tests/oxytocin-v2-reader.php'
+      - 'tests/oxytocin-v2-reader-fixture.php'
+      - 'tests/oxytocin-v2-reader-http.sh'
       - '.github/workflows/oxytocin-v2-check.yml'
   workflow_dispatch:
 
@@ -29,6 +32,15 @@ jobs:
           php -l oxytocin/v2/admin.php
           php -l oxytocin/v2/render.php
           php -l oxytocin/v2/preview.php
+          php -l oxytocin/v2/public.php
+          php -l oxytocin/v2/index.php
+          php -l oxytocin/v2/part.php
+          php -l oxytocin/v2/arc.php
+          php -l oxytocin/v2/episode.php
+          php -l oxytocin/v2/chapter.php
+          php -l oxytocin/v2/episode-read.php
+          php -l tests/oxytocin-v2-reader.php
+          php -l tests/oxytocin-v2-reader-fixture.php
           php -l tests/oxytocin-v2-editor.php
           php -l tests/oxytocin-v2-preview.php
           php -l tests/oxytocin-v2.php
@@ -38,5 +50,11 @@ jobs:
         run: php tests/oxytocin-v2-editor.php
       - name: Preview cannot publish
         run: php tests/oxytocin-v2-preview.php
+      - name: Reader access and navigation tests
+        run: php tests/oxytocin-v2-reader.php
+      - name: Public HTTP smoke tests
+        run: bash tests/oxytocin-v2-reader-http.sh
       - name: JavaScript syntax
-        run: node --check oxytocin/v2/editor.js
+        run: |
+          node --check oxytocin/v2/editor.js
+          node --check oxytocin/v2/reader.js
