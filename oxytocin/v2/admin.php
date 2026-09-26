@@ -194,7 +194,6 @@ unset($_SESSION['flash']);
 ?>
 <header class="topbar">
     <div class="topbar-identity">
-        <span class="eyebrow">OXYTOCIN · QUẢN TRỊ TRUYỆN</span>
         <h1>OXYTOCIN CMS</h1>
         <div class="stats-bar" aria-label="Tổng quan">
             <span>Phần <strong><?= count($parts) ?></strong></span>
@@ -211,11 +210,11 @@ unset($_SESSION['flash']);
 </header>
 <main class="workspace">
     <aside class="sidebar"><nav aria-label="Quản lý cấu trúc">
-        <a class="<?= $tab==='parts'?'active':'' ?>" href="?tab=parts">Phần <span><?= count($parts) ?></span></a>
-        <a class="<?= $tab==='arcs'?'active':'' ?>" href="?tab=arcs">Arc <span><?= count($arcs) ?></span></a>
-        <a class="<?= $tab==='episodes'?'active':'' ?>" href="?tab=episodes">Tập <span><?= count($episodes) ?></span></a>
-        <a class="<?= $tab==='chapters'?'active':'' ?>" href="?tab=chapters">Chương <span><?= count($chapters) ?></span></a>
-        <a class="<?= $tab==='settings'?'active':'' ?>" href="?tab=settings">Cài đặt trang <span>↗</span></a>
+        <a class="<?= $tab==='parts'?'active':'' ?>" href="?tab=parts">Phần</a>
+        <a class="<?= $tab==='arcs'?'active':'' ?>" href="?tab=arcs">Arc</a>
+        <a class="<?= $tab==='episodes'?'active':'' ?>" href="?tab=episodes">Tập</a>
+        <a class="<?= $tab==='chapters'?'active':'' ?>" href="?tab=chapters">Chương</a>
+        <a class="<?= $tab==='settings'?'active':'' ?>" href="?tab=settings">Cài đặt trang</a>
     </nav>
     <p class="sidebar-note">Dữ liệu v2 độc lập. Chương mới luôn là nháp.</p></aside>
     <section class="main-content">
@@ -258,26 +257,26 @@ unset($_SESSION['flash']);
         <?php else: ?>
         <form method="post" <?= $tab==='chapters' ? 'id="chapterForm"' : '' ?>><?php v2_hidden($tab, $tab==='chapters' && $edit && $edit['status']==='published' ? 'update_published' : 'save', (int)($edit['id'] ?? 0)); ?>
             <?php if ($tab === 'parts'):
-                v2_field('part_num','Số phần (0 = Prologue)', $edit['part_num'] ?? (count($parts)?max(array_column($parts,'part_num'))+1:0),'number',true);
-                v2_field('badge','Nhãn phần', $edit['badge'] ?? '');
+                v2_field('part_num','Phần số mấy? (0 = Prologue)', $edit['part_num'] ?? (count($parts)?max(array_column($parts,'part_num'))+1:0),'number',true);
+                v2_field('badge','Tên nhãn (ví dụ: Prologue)', $edit['badge'] ?? '');
                 v2_field('title_en','Tên tiếng Anh', $edit['title_en'] ?? '');
                 v2_field('title_vi','Tên tiếng Việt', $edit['title_vi'] ?? '');
                 v2_field('description','Mô tả', $edit['description'] ?? '','textarea');
                 v2_select('status','Trạng thái',['active'=>'Đang mở','coming_soon'=>'Sắp ra mắt'],$edit['status'] ?? 'active');
             elseif ($tab === 'arcs'):
                 v2_select('part_id','Thuộc phần',$partOptions,$edit['part_id'] ?? array_key_first($partOptions));
-                v2_field('arc_num','Số Arc trong phần',$edit['arc_num'] ?? 0,'number',true);
-                v2_field('slug','Slug đường dẫn',$edit['slug'] ?? '','text',true);
+                v2_field('arc_num','Arc số mấy trong phần?',$edit['arc_num'] ?? 0,'number',true);
+                v2_field('slug','Đường dẫn ngắn (slug)',$edit['slug'] ?? '','text',true);
                 v2_field('title_en','Tên tiếng Anh',$edit['title_en'] ?? '');
                 v2_field('title_vi','Tên tiếng Việt',$edit['title_vi'] ?? '');
                 v2_field('intro','Giới thiệu Arc',$edit['intro'] ?? '','textarea');
             elseif ($tab === 'episodes'):
                 v2_select('arc_id','Thuộc Arc',$arcOptions,$edit['arc_id'] ?? array_key_first($arcOptions));
-                v2_field('ep_num','Số tập trong Arc',$edit['ep_num'] ?? 1,'number',true);
+                v2_field('ep_num','Tập số mấy trong Arc?',$edit['ep_num'] ?? 1,'number',true);
                 v2_field('title_en','Tên tiếng Anh',$edit['title_en'] ?? '');
                 v2_field('title_vi','Tên tiếng Việt',$edit['title_vi'] ?? '');
                 v2_field('summary','Tóm tắt',$edit['summary'] ?? '','textarea');
-                v2_field('intro','Đầu tập',$edit['intro'] ?? '','textarea');
+                v2_field('intro','Lời mở đầu tập',$edit['intro'] ?? '','textarea');
             else:
                 v2_select('episode_id','Thuộc tập',$episodeOptions,$edit['episode_id'] ?? array_key_first($episodeOptions));
                 v2_field('title','Tên chương (không bắt buộc)',$edit['title'] ?? '');
@@ -339,26 +338,43 @@ unset($_SESSION['flash']);
         <?php endif; ?>
         </div>
         <div class="card"><h2>Danh sách <?= ['parts'=>'phần','arcs'=>'Arc','episodes'=>'tập','chapters'=>'chương'][$tab] ?></h2>
-        <?php if (!$rows): ?><p class="muted">Chưa có dữ liệu. Database v2 khởi tạo trống.</p><?php else: ?>
-            <div class="table-scroll"><table><thead><tr><th>Thứ tự</th><th>Thông tin</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+        <?php if (!$rows): ?><p class="muted">Chưa có dữ liệu.</p><?php else: ?>
+            <div class="table-scroll"><table><thead><tr>
+                <th>Số hiển thị</th><th>Tên và vị trí</th>
+                <?php if ($tab==='parts' || $tab==='chapters'): ?><th>Trạng thái</th><?php endif; ?>
+                <th>Thao tác</th>
+            </tr></thead><tbody>
             <?php foreach ($rows as $row): ?>
-            <tr><td class="order">
-                <?php if ($tab==='parts'): ?><?= (int)$row['part_num'] ?>
-                <?php elseif ($tab==='arcs'): ?><?= (int)$row['part_num'] ?> / <?= (int)$row['arc_num'] ?>
-                <?php elseif ($tab==='episodes'): ?><?= (int)$row['part_num'] ?> / <?= (int)$row['arc_num'] ?> / <?= (int)$row['ep_num'] ?>
-                <?php else: ?><?= $row['public_number'] === null ? ($row['status'] === 'published' ? 'Ẩn theo phần' : 'Nháp') : 'Chương ' . $row['public_number'] ?>
-                    <small>Vị trí <?= (int)$row['sort_order'] ?></small>
+            <tr>
+                <td class="order">
+                    <?php if ($tab==='parts'): ?>Phần <?= (int)$row['part_num'] ?>
+                    <?php elseif ($tab==='arcs'): ?>Arc <?= (int)$row['arc_num'] ?>
+                    <?php elseif ($tab==='episodes'): ?>Tập <?= (int)$row['ep_num'] ?>
+                    <?php else: ?><?= $row['public_number'] === null ? ($row['status']==='published' ? 'Chưa hiển thị' : 'Chưa đăng') : 'Chương ' . (int)$row['public_number'] ?>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <strong><?= v2_h($tab==='chapters' ? ($row['title'] ?: 'Chương chưa đặt tên') : ($row['title_vi'] ?: $row['title_en'])) ?></strong>
+                    <?php if ($tab==='arcs'): ?><small>Thuộc Phần <?= (int)$row['part_num'] ?> · /<?= v2_h($row['slug']) ?></small>
+                    <?php elseif ($tab==='episodes'): ?><small>Thuộc Phần <?= (int)$row['part_num'] ?> · Arc <?= (int)$row['arc_num'] ?></small>
+                    <?php elseif ($tab==='chapters'): ?><small>Thuộc Phần <?= (int)$row['part_num'] ?> · Arc <?= (int)$row['arc_num'] ?> · Tập <?= (int)$row['ep_num'] ?></small><?php endif; ?>
+                </td>
+                <?php if ($tab==='parts' || $tab==='chapters'): ?>
+                <td>
+                    <?php if ($tab==='chapters'): ?><span class="pill <?= $row['status']==='published'?'published':'' ?>"><?= $row['status']==='published'?'Đã đăng':'Nháp' ?></span>
+                    <?php else: ?><span class="pill"><?= $row['status']==='active'?'Đang mở':'Sắp ra mắt' ?></span><?php endif; ?>
+                </td>
                 <?php endif; ?>
-            </td><td><strong><?= v2_h($tab==='chapters' ? ($row['title'] ?: 'Chương không tên') : (($row['title_vi'] ?: $row['title_en']))) ?></strong>
-                <?php if ($tab==='arcs'): ?><small><?= v2_h($row['slug']) ?></small><?php endif; ?>
-                <?php if ($tab==='chapters'): ?><small>Phần <?= (int)$row['part_num'] ?> · Arc <?= (int)$row['arc_num'] ?> · Tập <?= (int)$row['ep_num'] ?> · ID <?= (int)$row['id'] ?></small><?php endif; ?>
-            </td><td><?php if ($tab==='chapters'): ?><span class="pill <?= $row['status']==='published'?'published':'' ?>"><?= $row['status']==='published'?'Đã đăng':'Nháp' ?></span>
-                <?php elseif ($tab==='parts'): ?><span class="pill"><?= $row['status']==='active'?'Đang mở':'Sắp ra mắt' ?></span>
-                <?php else: ?><span class="muted">—</span><?php endif; ?></td>
-                <td><?php v2_commands($tab,$row); ?></td></tr>
+                <td><?php v2_commands($tab,$row); ?></td>
+            </tr>
             <?php endforeach; ?></tbody></table></div>
         <?php endif; ?></div>
-        <p class="hint">Số chương hiển thị tính theo thứ tự Phần → Arc → Tập → vị trí chương. Thao tác ↑ ↓ thay đổi thứ tự trong cấp tương ứng.</p>
+        <p class="hint">
+            <?php if ($tab==='parts'): ?>Phần 0 dành cho Prologue. Số phần chạy liên tục trên toàn truyện.
+            <?php elseif ($tab==='arcs'): ?>Số Arc bắt đầu lại trong mỗi phần; không phải số lượng Arc.
+            <?php elseif ($tab==='episodes'): ?>Số tập bắt đầu lại trong mỗi Arc; không phải số lượng tập.
+            <?php else: ?>Số chương chạy liên tục trên toàn truyện và được tính tự động khi đăng. ↑ ↓ chỉ đổi vị trí chương trong tập.<?php endif; ?>
+        </p>
         <?php endif; ?>
     </section>
 </main>
