@@ -160,7 +160,10 @@ unset($_SESSION['flash']);
 ?>
 <!doctype html><html lang="vi"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quản trị OXYTOCIN v2</title><link rel="stylesheet" href="admin.css"><link rel="stylesheet" href="editor.css"><script src="editor.js" defer></script>
+<title>Quản trị OXYTOCIN v2</title>
+<link rel="stylesheet" href="admin.css?v=<?= filemtime(__DIR__ . '/admin.css') ?>">
+<link rel="stylesheet" href="editor.css?v=<?= filemtime(__DIR__ . '/editor.css') ?>">
+<script src="editor.js?v=<?= filemtime(__DIR__ . '/editor.js') ?>" defer></script>
 </head><body>
 <?php if (!$authenticated): ?>
 <main class="login card">
