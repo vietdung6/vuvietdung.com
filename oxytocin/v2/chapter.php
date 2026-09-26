@@ -21,9 +21,7 @@ v2_reader_breadcrumb([
 ]);
 ?>
 <header class="episode-header-page v2-episode-header">
-    <div class="brand">VVD · Novel</div>
-    <div class="ep-label-row"><span class="ep-label-badge"><?= v2_h($chapter['part_badge']) ?></span>
-        <span class="ep-label-number">Chương <?= $chapter['number'] ?></span></div>
+    <?php if ($chapter['title']): ?><div class="ep-label-row"><span class="ep-label-number">Chương <?= $chapter['number'] ?></span></div><?php endif; ?>
     <h1 class="ep-title-en"><?= v2_h($chapter['title'] ?: 'Chương ' . $chapter['number']) ?></h1>
     <div class="v2-rule" aria-hidden="true"></div>
 </header>
@@ -42,8 +40,4 @@ v2_reader_breadcrumb([
     </a>
     <?php else: ?><span class="bottom-nav-btn disabled"><span class="nav-dir">Chương sau</span><span class="nav-name">Đã hết chương được đăng</span></span><?php endif; ?>
 </nav>
-<div class="v2-backlinks">
-    <a href="episode.php?id=<?= $episode['id'] ?>">Trang tập <?= $episode['num'] ?></a>
-    <a href="episode-read.php?id=<?= $episode['id'] ?>">Đọc toàn bộ tập</a>
-</div>
 <?php v2_reader_close(true); ?>
