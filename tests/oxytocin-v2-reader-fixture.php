@@ -13,7 +13,8 @@ $a0=fixture_insert($db,'arcs',['part_id'=>(string)$p0,'arc_num'=>'0','slug'=>'st
 $e0=fixture_insert($db,'episodes',['arc_id'=>(string)$a0,'ep_num'=>'0',
     'title_en'=>'Variable','title_vi'=>'Biến số','summary'=>'','intro'=>'']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'Chương đầu',
-    'content'=>'<p>PUBLIC_ONE_UNIQUE</p>','content_format'=>'html','action'=>'save_publish']);
+    'content'=>'<p>PUBLIC_ONE_UNIQUE</p>' . str_repeat('<p>Đoạn văn kiểm thử vị trí đọc trên thiết bị và chuyển cảnh.</p>', 65),
+    'content_format'=>'html','action'=>'save_publish']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'CHAPTER_DRAFT_TITLE',
     'content'=>'SECRET_DRAFT_SHOULD_NOT_LEAK','content_format'=>'noir_text','action'=>'save']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'Chương hai',
