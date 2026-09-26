@@ -58,28 +58,38 @@ try {
   page.on('pageerror', error => errors.push(error.message));
 
   await page.goto(at('index.php'));
-  assert.equal(await page.locator('.outline-part').count(), 1, 'Outline hides coming-soon parts');
-  // The v2 reader inherits the original OXYTOCIN cover, not generic nested panels.
-  assert.equal(await page.locator('.home-grid > .v2-part-card > .arc-card').count(), 1,
-    'Homepage uses the original paired cover-card treatment');
-  assert((await page.locator('.v2-part-summary .arc-card-title').evaluate(node =>
+  assert.equal(await page.locator('.v2-parts-grid > a.v2-part-card').count(), 1,
+    'Homepage contains one published Part as an actual link');
+  assert.equal(await page.locator('details, summary').count(), 0,
+    'Homepage must navigate to another page, never expand in place');
+  assert.equal(await page.locator('#toc-title').innerText(), 'Mục lục',
+    'Editorial table-of-contents heading exists');
+  assert((await page.locator('.v2-library-title').evaluate(node =>
+    getComputedStyle(node).fontFamily)).includes('Cormorant Garamond'),
+    'Vietnamese section heading uses original novel typography');
+  assert((await page.locator('.v2-part-card .arc-card-title').evaluate(node =>
     getComputedStyle(node).fontFamily)).includes('Cinzel'),
-    'Original Cinzel cover typography is restored');
-  assert.equal(await page.locator('.v2-parts-grid').evaluate(node =>
-    getComputedStyle(node).display), 'grid');
-  assert.equal(await page.locator('.reader-tools button svg').count(), 1,
-    'Reader theme control uses a quiet icon, not a chunky text button');
-  await page.locator('.outline-part > summary').click();
-  await page.locator('.outline-arc > summary').click();
-  assert.equal(await page.locator('.chapter-links a').count(), 3, 'Nested table of contents');
-  assert(!await page.locator('body').innerText().then(s => s.includes('SECRET_DRAFT_SHOULD_NOT_LEAK')));
-
-  await page.goto(at('part.php?id=1'));
+    'Original cover-title typography is restored');
+  assert.equal(await page.locator('svg').count(), 0,
+    'No decorative SVG icons appear on the reader');
+  assert(!(await page.locator('body').innerText()).includes('Trang riêng của phần'));
+  assert(!(await page.locator('body').innerText()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
+  await assertNoOverflow(page, 'Desktop cover');
+  await page.locator('.v2-part-card').click();
+  assert(page.url().includes('part.php?id=1'), 'Clicking a Part opens a separate page');
   assert.equal(await page.locator('.v2-arc-shelf .episode-card').count(), 2,
-    'Part page retains both episode links as original-style cards');
-  await page.goto(at('arc.php?id=1'));
+    'Part page shows the original episode cards');
+  assert.equal(await page.locator('svg').count(), 0, 'Part page has no SVG icons');
+  await page.locator('.v2-arc-heading a').click();
+  assert(page.url().includes('arc.php?id=1'), 'Arc heading navigates to the Arc page');
   assert.equal(await page.locator('.episode-cards .episode-card').count(), 2,
-    'Arc page retains the original episode grid');
+    'Arc page contains episode cards');
+  assert.equal(await page.locator('svg').count(), 0, 'Arc page has no SVG icons');
+  await page.locator('.episode-card').first().click();
+  assert(page.url().includes('episode.php?id=1'), 'Episode card navigates to chapter list');
+  assert.equal(await page.locator('.chapter-list a').count(), 2,
+    'Episode page contains only published chapters');
+  assert.equal(await page.locator('svg').count(), 0, 'Episode page has no SVG icons');
   await page.goto(at('episode.php?id=1'));
   assert.equal(await page.locator('.chapter-list a').count(), 2, 'Episode lists only published chapters');
   await page.locator('a.reader-primary').click();
@@ -204,8 +214,11 @@ try {
   await admin.locator('button[name="chapter_intent"][value="save_publish"]').click();
   await admin.waitForURL(/saved=1/);
   await page.reload();
+  assert(!(await page.content()).includes('BROWSER_DRAFT'),
+    'Home stays a Part-only index, even after another chapter is published');
+  await page.goto(at('episode.php?id=1'));
   assert((await page.content()).includes('BROWSER_DRAFT'),
-    'Explicit publish makes chapter visible even inside collapsed table of contents');
+    'Published chapter appears in its separate Episode page');
   const exposed = await page.request.get(at('chapter.php?id=' + id));
   assert.equal(exposed.status(), 200);
   assert((await exposed.text()).includes('BROWSER_DRAFT_EDITOR'));
@@ -229,9 +242,12 @@ try {
   const mobile = await mobileContext.newPage();
   mobile.on('pageerror', error => errors.push('mobile: ' + error.message));
   await mobile.goto(at('index.php'));
-  await assertNoOverflow(mobile, 'Mobile outline');
-  await mobile.locator('.outline-part > summary').click();
-  await mobile.locator('.outline-arc > summary').click();
+  await assertNoOverflow(mobile, 'Mobile cover');
+  await mobile.locator('.v2-part-card').click();
+  await assertNoOverflow(mobile, 'Mobile Part');
+  await mobile.locator('.v2-arc-heading a').click();
+  await assertNoOverflow(mobile, 'Mobile Arc');
+  assert.equal(await mobile.locator('svg').count(), 0, 'Mobile reader has no SVG icons');
   await mobile.goto(at('episode.php?id=1'));
   await assertNoOverflow(mobile, 'Mobile episode page');
   await mobile.locator('a.reader-primary').click();

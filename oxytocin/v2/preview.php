@@ -80,9 +80,9 @@ try {
             <span class="ep-label-number"><?= $chapterNumber !== null ? 'Chương ' . (int)$chapterNumber : 'Chương · Bản thảo' ?></span>
         </div>
         <h1 class="ep-title-en"><?= v2_h($title ?: 'Chương không tên') ?></h1>
-        <div class="page-divider ep-divider"><span></span>✦<span></span></div>
+        <div class="v2-rule" aria-hidden="true"></div>
     </header>
     <article class="episode-body v2-reading-body"><?= $rendered ?></article>
-    <footer><div class="signature">✦ VVD WORKS ✦</div><p>Bản xem trước chỉ hiển thị trong phiên quản trị.</p></footer>
+    <footer><div class="signature">VVD WORKS</div><p>Bản xem trước chỉ hiển thị trong phiên quản trị.</p></footer>
 </div>
 </body></html>
