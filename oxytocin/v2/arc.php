@@ -18,7 +18,7 @@ v2_reader_breadcrumb([
     <div class="page-label"><?= v2_h($part['badge']) ?> · Arc <?= $arc['num'] ?></div>
     <h1 class="page-title"><?= v2_h($arc['en'] ?: $arc['vi']) ?></h1>
     <?php if ($arc['en'] && $arc['vi']): ?><div class="page-subtitle"><?= v2_h($arc['vi']) ?></div><?php endif; ?>
-    <div class="page-divider"><span></span>✦<span></span></div>
+    <div class="v2-rule" aria-hidden="true"></div>
     <?php if ($arc['intro']): ?><p class="page-intro"><?= nl2br(v2_h($arc['intro'])) ?></p><?php endif; ?>
 </header>
 <nav class="mini-toc v2-arc-shelf" aria-label="Danh sách tập">
@@ -37,7 +37,7 @@ v2_reader_breadcrumb([
             <?php if ($episode['summary']): ?><p class="ep-card-desc"><?= v2_h($episode['summary']) ?></p><?php endif; ?>
             <div class="ep-card-foot">
                 <span class="ep-card-meta"><?= count($episode['chapters']) ?> chương</span>
-                <span class="ep-card-arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
+                
             </div>
         </a>
         <?php endforeach; ?>
