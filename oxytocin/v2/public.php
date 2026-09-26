@@ -148,10 +148,11 @@ function v2_reader_open(string $title, string $mode = '', int $chapterId = 0, in
 function v2_reader_close(): void {
     echo '<footer class="v2-footer"><div class="signature">VVD WORKS</div>'
         . '<p>© OXYTOCIN</p></footer></main>'
-        . '<nav class="reader-tools" aria-label="Tùy chỉnh việc đọc">'
-        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối">Nền</button>'
-        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ">Cỡ chữ</button>'
-        . '<a href="index.php">Mục lục</a></nav>'
+        . '<nav class="reader-tools" aria-label="Điều khiển đọc">'
+        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối" aria-pressed="false">Nền</button>'
+        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ">A+</button>'
+        . '<a href="index.php" title="Về mục lục">Mục lục</a>'
+        . '<button type="button" id="readerFullscreen" title="Bật chế độ đọc toàn màn hình" aria-label="Bật chế độ đọc toàn màn hình" aria-pressed="false">Toàn màn hình</button></nav>'
         . '<div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>'
         . '</body></html>';
 }
