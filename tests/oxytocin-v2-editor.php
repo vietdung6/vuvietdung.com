@@ -43,6 +43,10 @@ try {
         editor_assert(!str_contains($safe,$bad), 'Strip ' . $bad);
     }
     editor_assert(v2_sanitize_html($safe) === $safe, 'Sanitizer idempotence');
+    editor_assert(str_contains(v2_sanitize_html('<p>---</p>'),'class="scene-break"'),
+        'Typed --- is a scene break inside a single chapter');
+    editor_assert(str_contains(v2_sanitize_html('<p>✦ ✦ ✦</p>'),'class="scene-break"'),
+        'Typed stars are a scene break inside a single chapter');
     editor_assert(!v2_text_visible('<p><br></p>','html'), 'Cannot publish empty editor');
     editor_assert(!v2_text_visible('<p>&nbsp;</p>','html'), 'Whitespace-only editor is empty');
     editor_assert(!v2_text_visible('<p class="scene-break">✦ ✦ ✦</p>','html'),
