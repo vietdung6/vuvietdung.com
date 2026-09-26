@@ -62,6 +62,7 @@ try {
 <title><?= v2_h($title ?: 'Chương không tên') ?> · Xem trước OXYTOCIN</title>
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="preview.css">
+<link rel="stylesheet" href="reader.css">
 </head><body>
 <div class="container">
     <div class="preview-notice" role="status">BẢN XEM TRƯỚC — Chưa đăng · Không được lưu lên máy chủ khi xem trước</div>
@@ -81,7 +82,7 @@ try {
         <h1 class="ep-title-en"><?= v2_h($title ?: 'Chương không tên') ?></h1>
         <div class="page-divider ep-divider"><span></span>✦<span></span></div>
     </header>
-    <article class="episode-body"><?= $rendered ?></article>
+    <article class="episode-body v2-reading-body"><?= $rendered ?></article>
     <footer><div class="signature">✦ VVD WORKS ✦</div><p>Bản xem trước chỉ hiển thị trong phiên quản trị.</p></footer>
 </div>
 </body></html>
