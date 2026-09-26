@@ -10,8 +10,6 @@ v2_reader_open(v2_display_title($part['en'],$part['vi']));
 v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
 ?>
 <header class="page-header v2-page-header">
-    <div class="brand">VVD · Novel</div>
-    <div class="page-label"><?= v2_h($part['badge'] ?: 'Phần ' . $part['num']) ?></div>
     <h1 class="page-title"><?= v2_h($part['en'] ?: $part['vi']) ?></h1>
     <?php if ($part['en'] && $part['vi']): ?><div class="page-subtitle"><?= v2_h($part['vi']) ?></div><?php endif; ?>
     <div class="v2-rule" aria-hidden="true"></div>
@@ -27,7 +25,6 @@ v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
             <a class="episode-card" href="episode.php?id=<?= $episode['id'] ?>">
                 <div class="ep-card-top">
                     <span class="ep-card-idx"><?= str_pad((string)$episode['num'], 2, '0', STR_PAD_LEFT) ?></span>
-                    <span class="ep-card-badge">Tập <?= $episode['num'] ?></span>
                 </div>
                 <div class="ep-card-titles">
                     <h3 class="ep-card-title"><?= v2_h($episode['en'] ?: $episode['vi'] ?: 'Tập ' . $episode['num']) ?></h3>
