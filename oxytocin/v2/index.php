@@ -25,9 +25,8 @@ v2_reader_open($site['site_title'] ?: 'OXYTOCIN', 'home');
 <?php endif; ?>
 <nav class="arc-nav v2-library" aria-labelledby="toc-title">
     <div class="v2-library-heading">
-        <div class="v2-library-upper"><span class="v2-library-eyebrow">OXYTOCIN · DANH SÁCH PHẦN</span><a href="index.php" class="v2-continue" id="continueReading" hidden>Đọc tiếp</a></div>
         <h2 class="v2-library-title" id="toc-title">Mục lục</h2>
-        <div class="v2-library-rule" aria-hidden="true"></div>
+        <a href="index.php" class="v2-continue" id="continueReading" hidden>Đọc tiếp</a>
     </div>
     <?php if (!$outline['parts']): ?>
         <p class="reader-empty">Chưa có chương nào được xuất bản.</p>
@@ -44,7 +43,6 @@ v2_reader_open($site['site_title'] ?: 'OXYTOCIN', 'home');
             <?php if ($part['description']): ?><p class="arc-card-desc"><?= nl2br(v2_h($part['description'])) ?></p><?php endif; ?>
             <div class="arc-card-meta">
                 <span class="arc-card-count"><?= count($part['arcs']) ?> Arc · <?= array_sum(array_map(static fn($arc) => count($arc['episodes']), $part['arcs'])) ?> tập</span>
-                <span class="v2-card-open">Khám phá</span>
             </div>
         </a>
         <?php endforeach; ?>

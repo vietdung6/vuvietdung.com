@@ -43,7 +43,7 @@ grep -q 'id="toc-title">Mục lục</h2>' "$test_dir/index.html"
 ! grep -q 'chapter.php?id=' "$test_dir/index.html"
 grep -q 'href="arc.php?id=1"' "$test_dir/part.html"
 grep -q 'class="episode-card" href="episode.php?id=1"' "$test_dir/part.html"
-grep -q 'Tập 0' "$test_dir/part.html"
+grep -q 'class="ep-card-idx">00</span>' "$test_dir/part.html"
 grep -q 'Chương 1' "$test_dir/episode.html"
 grep -q 'Chương 2' "$test_dir/episode.html"
 grep -q 'Chương 3' "$test_dir/chapter4.html"
@@ -55,9 +55,9 @@ for reader in "$test_dir/chapter1.html" "$test_dir/full.html"; do
   grep -q 'id="readerTheme"' "$reader"
   grep -q 'id="readerFont"' "$reader"
   grep -q 'id="readerFullscreen"' "$reader"
-  test "$(grep -o '<svg' "$reader" | wc -l)" -eq 6
+  test "$(grep -o '<svg' "$reader" | wc -l)" -eq 5
 done
-grep -q 'Đọc toàn bộ tập' "$test_dir/episode.html"
+grep -q 'Đọc cả tập' "$test_dir/episode.html"
 grep -q 'episode-read.php?id=1' "$test_dir/episode.html"
 grep -q 'chapter.php?id=1' "$test_dir/episode.html"
 grep -q 'chapter.php?id=3' "$test_dir/episode.html"
