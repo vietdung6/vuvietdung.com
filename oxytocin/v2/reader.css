@@ -331,7 +331,7 @@
 .v2-backlinks a:hover { color: var(--text-bright); }
 .v2-footer { margin-top: 70px; }
 
-/* Restore the old, individually floating reading controls. Text, no icons. */
+/* Restore the original floating icon controls, exclusively on reading pages. */
 .reader-tools {
     position: fixed;
     z-index: 200;
@@ -390,14 +390,23 @@ body.reader-immersive .reader-tools {
     border-color: var(--border-accent);
     color: var(--accent-light);
 }
-.reader-tools a {
-    width: 70px;
-    border-radius: 24px;
+.reader-tools svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
 }
-.reader-tools #readerFullscreen {
-    width: 107px;
-    border-radius: 24px;
-}
+.reader-tools .icon-moon,
+.reader-tools .icon-collapse { display: none; }
+body.theme-light .reader-tools .icon-sun,
+.reader-tools #readerFullscreen[aria-pressed="true"] .icon-expand { display: none; }
+body.theme-light .reader-tools .icon-moon,
+.reader-tools #readerFullscreen[aria-pressed="true"] .icon-collapse { display: block; }
 body.theme-light .reader-tools button,
 body.theme-light .reader-tools a { box-shadow: 0 3px 13px rgba(0,0,0,.13); }
 
@@ -470,9 +479,8 @@ body.reader-immersive .v2-full-chapter:first-of-type .v2-full-heading {
     .chapter-list a { flex-wrap: wrap; }
     .chapter-list a strong { flex-basis: 100%; }
     .reader-tools { left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); gap: 6px; }
-    .reader-tools button { width: 40px; height: 40px; font-size: .62rem; }
-    .reader-tools a { width: 65px; height: 40px; font-size: .62rem; }
-    .reader-tools #readerFullscreen { width: 102px; }
+    .reader-tools button, .reader-tools a { width: 40px; height: 40px; }
+    .reader-tools svg { width: 18px; height: 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .v2-part-card, .reader-tools button, .reader-tools a, .reader-progress span { transition: none; }
