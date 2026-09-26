@@ -1,6 +1,6 @@
-# OXYTOCIN v2 — Bước 4 (quản trị + trình soạn thảo)
+# OXYTOCIN v2 — Bước 5 (quản trị + trình soạn thảo + trang đọc)
 
-**Chưa phải hệ thống đọc mới.** Đây là nhánh thử nghiệm cho trang quản trị và trình soạn thảo Phần → Arc → Tập → Chương. Không tự nhập lại truyện và không mở nội dung mới cho độc giả. Không thay đổi `oxytocin.db`, `db.php`, `read.php` hoặc admin cũ.
+**Đã có mã nguồn trang đọc mới, nhưng chưa triển khai production.** Nhánh thử nghiệm bao gồm trang quản trị, trình soạn thảo và các trang đọc mới Phần → Arc → Tập → Chương. Không tự nhập lại truyện; không thay đổi `oxytocin.db`, `db.php`, `read.php` hoặc admin cũ.
 
 ## Database
 
@@ -32,6 +32,19 @@ Số phần toàn series; số Arc trong mỗi phần; số tập trong mỗi Ar
 - `preview.php` dùng session + CSRF, nhận nội dung từ biểu mẫu qua POST, hiển thị kiểu trang đọc hiện tại mà **không ghi dữ liệu**. Trình duyệt phải cho phép mở tab mới cho bản xem trước.
 - Editor tạo bản khôi phục bằng `localStorage` của chính thiết bị/trình duyệt. Mỗi lần mở lại, có lựa chọn **Khôi phục** hoặc **Bỏ bản khôi phục**. Tự lưu không gửi nội dung lên server, không đăng chương. Cảnh báo trước khi rời trang nếu còn thay đổi chưa lưu. Nếu trình duyệt chặn hoặc xóa localStorage, bản khôi phục không được bảo đảm; vẫn nên chọn Lưu nháp định kỳ. Mỗi thiết bị hiện có một bản khôi phục cho biểu mẫu chương mới (`new`).
 - Không tải thư viện hoặc font từ trình soạn thảo bên thứ ba. Toolbar dùng các lệnh chỉnh sửa sẵn có của trình duyệt; cần kiểm tra thao tác thật trên các trình duyệt dùng để viết (desktop/mobile) trước khi triển khai.
+
+## Trang đọc công khai (bước 5)
+
+- `index.php`: mục lục mới Phần → Arc → Tập → Chương, có thể thu gọn bằng `details`. Chỉ liệt kê chương `published` trong phần `active`; phần/tập chưa có chương công khai không được đưa vào mục lục.
+- `part.php?id=...`, `arc.php?id=...`: trang cấp phần và Arc. `episode.php?id=...`: **trang tập**, liệt kê các chương đã đăng và nút **Đọc toàn bộ tập**.
+- `chapter.php?id=...`: đọc một chương. Nút chương trước/sau duyệt liên tục toàn series (kể cả khi sang tập, Arc, phần khác). `episode-read.php?id=...`: đọc các chương đã đăng trong một tập, ghép từ cùng dữ liệu (không lưu bản sao). Nội dung nháp và các phần sắp ra mắt đều bị từ chối **ở phía PHP**, kể cả khi đoán đúng ID.
+- ID chương/tập ổn định trong URL; số chương hiển thị được tính lại theo thứ tự Phần, Arc, Tập, chương công khai. Số chương trong CMS được đồng bộ với số trên trang đọc. Những chương đã đăng nằm trong phần `coming_soon` không được tính số công khai và chưa thể đọc cho tới khi mở phần.
+- `reader.js` tái sử dụng lựa chọn nền/cỡ chữ ở trình duyệt (khóa localStorage cũ: `reading_theme`, `reading_fontsize`), lưu tiến độ v2 riêng bằng khóa `oxytocin:v2:reading-progress`. Trên các trang đọc, `Đọc tiếp` phục hồi đúng chế độ đọc chương/tập và vị trí gần nhất (trong phạm vi thiết bị/trình duyệt). Nếu chương được thu hồi, liên kết cũ dẫn đến 404 thay vì làm lộ nội dung. Vị trí không đồng bộ qua nhiều thiết bị.
+- `read.php?arc=...&ep=...` **bản cũ chưa sửa**, vẫn sử dụng database gốc; chưa thay đổi liên kết từ trang chủ hiện hành sang hệ thống v2. Không gộp database production với database trống. Khi đến bước triển khai, cần quyết định cách chuyển mục lục công khai mà không phá các URL cũ.
+- `---` và `✦ ✦ ✦` trong một chương là dấu ngắt cảnh, không tự tách chương. HTML đã đăng được lọc lại trên máy chủ khi hiển thị.
+- Trang mới sử dụng bộ CSS Noir đang có, bổ sung `reader.css`; trang xem trước dùng chung CSS trình đọc. Không thiết kế lại UI gọn hơn trong bước này.
+
+**Chưa kiểm thử trên hosting hoặc bằng trình duyệt thực tế.** Trước khi merge/deploy cần kiểm tra trải nghiệm cuộn, cỡ chữ, phục hồi vị trí và chế độ đọc liên tập trên cả desktop và điện thoại. Hệ thống phải được cấu hình biến môi trường và database v2 trước khi thử trên hosting; thiếu cấu hình sẽ trả 503 và không tự tạo database.
 
 ## Kiểm thử
 
