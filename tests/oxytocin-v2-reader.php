@@ -50,6 +50,9 @@ try {
     ensure(count($outline['byArc'])===2,'Hide arcs without public chapters');
     ensure(count($outline['byEpisode'])===2,'Hide empty/private episodes');
     ensure(count($outline['ordered'])===3,'Only three published public chapters');
+    $numberedAll = v2_numbered_chapters($db);
+    $numberedPublic = array_values(array_filter(array_column($numberedAll,'public_number'),fn($value)=>$value!==null));
+    ensure($numberedPublic===[1,2,3],'CMS numbering matches public reading order');
     ensure(array_column($outline['ordered'],'id')===[$c1,$c2,$c3],'Public order across parts');
     ensure(array_column($outline['ordered'],'number')===[1,2,3],'Continuous chapter numbering');
     ensure(count($outline['byEpisode'][$e1]['chapters'])===2,'Episode chapter listing');
