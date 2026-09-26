@@ -36,12 +36,20 @@ curl -fsS "$base/chapter.php?id=3" >"$test_dir/chapter3.html"
 curl -fsS "$base/episode-read.php?id=1" >"$test_dir/full.html"
 curl -fsS "$base/chapter.php?id=4" >"$test_dir/chapter4.html"
 
-grep -q 'class="outline-part v2-part-card"' "$test_dir/index.html"
-grep -q 'class="outline-arc"' "$test_dir/index.html"
-grep -q 'Tập 0' "$test_dir/index.html"
-grep -q 'Chương 1' "$test_dir/index.html"
-grep -q 'Chương 2' "$test_dir/index.html"
-grep -q 'Chương 3' "$test_dir/index.html"
+grep -q 'class="arc-card v2-part-card" href="part.php?id=1"' "$test_dir/index.html"
+grep -q 'id="toc-title">Mục lục</h2>' "$test_dir/index.html"
+! grep -q '<details' "$test_dir/index.html"
+! grep -q 'Trang riêng của phần' "$test_dir/index.html"
+! grep -q 'chapter.php?id=' "$test_dir/index.html"
+grep -q 'href="arc.php?id=1"' "$test_dir/part.html"
+grep -q 'class="episode-card" href="episode.php?id=1"' "$test_dir/part.html"
+grep -q 'Tập 0' "$test_dir/part.html"
+grep -q 'Chương 1' "$test_dir/episode.html"
+grep -q 'Chương 2' "$test_dir/episode.html"
+grep -q 'Chương 3' "$test_dir/chapter4.html"
+for reader in "$test_dir/index.html" "$test_dir/part.html" "$test_dir/arc.html" "$test_dir/episode.html" "$test_dir/chapter1.html" "$test_dir/full.html"; do
+  ! grep -q '<svg' "$reader"
+done
 grep -q 'Đọc toàn bộ tập' "$test_dir/episode.html"
 grep -q 'episode-read.php?id=1' "$test_dir/episode.html"
 grep -q 'chapter.php?id=1' "$test_dir/episode.html"
@@ -83,4 +91,4 @@ expect_code 404 'arc.php?id=2'
 expect_code 404 'chapter.php?id=0'
 expect_code 404 'chapter.php?id=999999999999999999999'
 expect_code 403 'preview.php'
-echo 'PASS: PHP HTTP 200 routes, nested TOC, per-chapter and full-episode rendering, cross-episode navigation, 404 for drafts and hidden parts'
+echo 'PASS: original Part-to-page navigation, icon-free reader, chapter/full-episode rendering, cross-episode navigation, privacy and HTTP access'
