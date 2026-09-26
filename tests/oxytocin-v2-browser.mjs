@@ -98,12 +98,16 @@ try {
   await page.goto(at('episode-read.php?id=1'));
   await page.evaluate(() => {
     const second = document.querySelector('#chapter-3');
-    window.scrollTo(0, second.getBoundingClientRect().top + window.scrollY + 80);
+    const target = second.getBoundingClientRect().top + window.scrollY + 80;
+    // The existing OXYTOCIN stylesheet sets scroll-behavior:smooth;
+    // force instant movement to make the scroll-position check deterministic.
+    window.scrollTo({ top: target, behavior: 'instant' });
+    window.dispatchEvent(new Event('scroll'));
   });
   await page.waitForFunction(() => {
     const stored = localStorage.getItem('oxytocin:v2:reading-progress');
     return stored && JSON.parse(stored).chapterId === 3;
-  }, { timeout: 5000 });
+  }, null, { timeout: 5000 });
   await page.reload();
   await page.waitForTimeout(450);
   const savedY = await page.evaluate(() => window.scrollY);
