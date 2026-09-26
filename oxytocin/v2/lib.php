@@ -341,7 +341,7 @@ function v2_rows(PDO $db, string $type): array {
         'parts' => $db->query('SELECT * FROM parts ORDER BY part_num,id')->fetchAll(),
         'arcs' => $db->query('SELECT a.*,p.part_num,p.badge FROM arcs a JOIN parts p ON p.id=a.part_id ORDER BY p.part_num,a.arc_num,a.id')->fetchAll(),
         'episodes' => $db->query('SELECT e.*,a.arc_num,a.part_id,p.part_num FROM episodes e JOIN arcs a ON a.id=e.arc_id JOIN parts p ON p.id=a.part_id ORDER BY p.part_num,a.arc_num,e.ep_num,e.id')->fetchAll(),
-        'chapters' => $db->query("SELECT c.*,e.ep_num,a.arc_num,p.part_num FROM chapters c
+        'chapters' => $db->query("SELECT c.*,e.ep_num,a.arc_num,p.part_num,p.status AS part_status FROM chapters c
             JOIN episodes e ON e.id=c.episode_id JOIN arcs a ON a.id=e.arc_id
             JOIN parts p ON p.id=a.part_id ORDER BY p.part_num,a.arc_num,e.ep_num,c.sort_order,c.id")->fetchAll(),
         default => throw new DomainException('Danh sách không hợp lệ.')
@@ -352,7 +352,9 @@ function v2_numbered_chapters(PDO $db): array {
     $chapters = v2_rows($db, 'chapters');
     $number = 0;
     foreach ($chapters as &$chapter) {
-        $chapter['public_number'] = $chapter['status'] === 'published' ? ++$number : null;
+        // Match public outline: a published chapter in a coming-soon part has no public number.
+        $chapter['public_number'] = $chapter['status'] === 'published' && $chapter['part_status'] === 'active'
+            ? ++$number : null;
     }
     unset($chapter);
     return $chapters;
