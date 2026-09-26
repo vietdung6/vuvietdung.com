@@ -4,7 +4,8 @@
  * cover cards, episode cards and headings. Only v2-specific layout is here.
  */
 
-/* The cover uses the same uninterrupted opening as the original site. */
+/* Smaller, quieter typography and a single route back to the library. */
+body { font-size: 16.5px; }
 .reader-topbar {
     position: relative;
     z-index: 2;
@@ -36,39 +37,30 @@
     letter-spacing: .07em;
     text-decoration: none;
 }
+.reader-topbar a:link,
+.reader-topbar a:visited { color: var(--text-dim); text-decoration: none; }
+.reader-topbar .reader-logo:link,
+.reader-topbar .reader-logo:visited { color: var(--gold); }
 .reader-topbar a:hover { color: var(--accent-light); }
 .reader-topbar a[hidden] { display: none; }
-.v2-main { min-height: 60vh; padding-top: 15px; }
-.v2-hero { padding: 60px 20px 50px; margin-bottom: 60px; }
+.v2-main { min-height: 60vh; padding-top: 10px; }
+.v2-hero { padding: 46px 20px 34px; margin-bottom: 43px; }
 .v2-hero h1 {
-    font-size: clamp(2.6rem, 6.5vw, 3.2em);
+    font-size: clamp(2.05rem, 5vw, 2.65rem);
     letter-spacing: clamp(2px, .6vw, 6px);
     overflow-wrap: anywhere;
 }
-.v2-synopsis { margin-bottom: 70px; }
+.v2-synopsis { margin-bottom: 50px; }
 
 /* An actual table of contents: one carefully composed heading and book covers. */
 .v2-library.arc-nav { margin-bottom: 70px; }
 .v2-library-heading {
-    margin: 0 0 30px;
-    padding: 0 0 5px;
+    margin: 0 0 23px;
     text-align: center;
 }
-.v2-library-upper {
-    min-height: 19px;
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px 24px;
-}
-.v2-library-eyebrow {
-    color: var(--gold);
-    font: 500 .63rem/1.6 'Inter', sans-serif;
-    letter-spacing: .23em;
-    text-transform: uppercase;
-}
 .v2-continue {
+    display: inline-block;
+    margin-top: 2px;
     color: var(--accent-light);
     font: 400 .9rem/1.5 'Cormorant Garamond', Georgia, serif;
     font-style: italic;
@@ -78,13 +70,12 @@
 .v2-continue:hover { border-bottom-color: var(--gold); }
 .v2-continue[hidden] { display: none; }
 .v2-library-title {
-    margin: 7px 0 10px;
+    margin: 3px 0 7px;
     color: var(--text-bright);
-    font: 600 clamp(2.45rem, 5vw, 3.1rem)/1.2 'Cormorant Garamond', Georgia, serif;
+    font: 600 clamp(2.1rem, 4.5vw, 2.55rem)/1.2 'Cormorant Garamond', Georgia, serif;
     letter-spacing: .035em;
     text-transform: none;
 }
-.v2-library-rule,
 .v2-rule {
     width: 128px;
     height: 1px;
@@ -95,17 +86,15 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
 }
-.v2-part-card { min-width: 0; }
+.v2-part-card { min-width: 0; padding: 23px 21px 19px; }
+.v2-part-card .arc-card-index { font-size: 1.9em; }
+.v2-part-card .arc-card-badge { font-size: .63rem; }
+.v2-part-card .arc-card-title { font-size: 1.17em; letter-spacing: .09em; }
 .v2-part-card .arc-card-title { overflow-wrap: anywhere; }
 .v2-part-card .arc-card-desc {
-    font: 1.04rem/1.65 'Crimson Pro', Georgia, serif;
+    font: .99rem/1.65 'Crimson Pro', Georgia, serif;
 }
 .v2-part-card .arc-card-meta { margin-top: auto; }
-.v2-card-open {
-    color: var(--accent-light);
-    font: italic 1.14rem/1.2 'Cormorant Garamond', Georgia, serif;
-}
-.v2-part-card:hover .v2-card-open { color: var(--text-bright); }
 .v2-part-card:focus-visible,
 .episode-card:focus-visible,
 .reader-primary:focus-visible {
@@ -122,7 +111,7 @@
 .reader-empty h1 { color: var(--text-bright); }
 
 /* One page per Part, with the original grouped Arc/episode-card layout. */
-.v2-arc-shelf { padding: 25px 26px 28px; margin: 0 0 35px; }
+.v2-arc-shelf { padding: 22px 23px 24px; margin: 0 0 28px; }
 .v2-arc-heading {
     display: flex;
     align-items: baseline;
@@ -142,7 +131,7 @@
 }
 .v2-arc-heading a {
     color: var(--text-bright);
-    font: 600 1.65rem/1.2 'Cormorant Garamond', Georgia, serif;
+    font: 600 1.48rem/1.2 'Cormorant Garamond', Georgia, serif;
     letter-spacing: .015em;
     text-decoration: none;
     overflow-wrap: anywhere;
@@ -152,14 +141,16 @@
 .v2-arc-shelf .v2-arc-intro {
     margin: -3px 0 20px;
     color: var(--text-dim);
-    font: italic 1.2rem/1.5 'Cormorant Garamond', Georgia, serif;
+    font: italic 1.12rem/1.5 'Cormorant Garamond', Georgia, serif;
 }
 .v2-arc-shelf .episode-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.v2-arc-shelf .episode-card { min-width: 0; }
+.v2-arc-shelf .episode-card { min-width: 0; padding: 20px 18px 15px; gap: 8px; }
+.v2-arc-shelf .ep-card-idx { font-size: 1.62em; }
+.v2-arc-shelf .ep-card-title { font-size: 1.07em; letter-spacing: .09em; }
 .v2-arc-shelf .ep-card-title { overflow-wrap: anywhere; }
-.v2-arc-shelf .ep-card-sub { font-size: 1.2rem; }
+.v2-arc-shelf .ep-card-sub { font-size: 1.06rem; }
 .v2-arc-shelf .ep-card-desc {
-    font: 1.04rem/1.6 'Crimson Pro', Georgia, serif;
+    font: .98rem/1.6 'Crimson Pro', Georgia, serif;
 }
 .v2-arc-shelf .ep-card-foot { margin-top: auto; }
 .v2-arc-shelf .ep-card-meta { font-size: .7rem; }
@@ -168,9 +159,15 @@
     font-size: .74rem;
     letter-spacing: .13em;
 }
-.v2-page-header { margin-bottom: 55px; }
-.v2-episode-header { margin-bottom: 55px; }
-.v2-rule { margin: 24px auto 28px; }
+.v2-page-header { padding-top: 30px; padding-bottom: 32px; margin-bottom: 35px; }
+.v2-page-header .page-title { font-size: 2.2em; letter-spacing: .12em; }
+.v2-page-header .page-subtitle { font-size: 1.15em; }
+.v2-episode-header { padding-top: 31px; padding-bottom: 34px; margin-bottom: 33px; }
+.v2-episode-header .ep-title-en { font-size: 2.15em; letter-spacing: .12em; }
+.v2-episode-header .ep-title-vi { font-size: 1.22em; letter-spacing: .08em; }
+.v2-episode-header .ep-intro { font-size: .98em; }
+.v2-episode-header .ep-label-row { margin-bottom: 12px; }
+.v2-rule { margin: 20px auto 22px; }
 
 /* Links, headings and rules rather than extra control panels. */
 .v2-breadcrumb {
@@ -179,24 +176,36 @@
     align-items: baseline;
     gap: 8px;
 }
-.v2-breadcrumb a { text-underline-offset: 3px; }
+.v2-breadcrumb a:link,
+.v2-breadcrumb a:visited { color: var(--text-dim); text-decoration: none; }
+.v2-breadcrumb a:hover,
+.v2-breadcrumb a:focus-visible { color: var(--accent-light); text-decoration: underline; text-underline-offset: 3px; }
 .v2-breadcrumb .breadcrumb-sep { opacity: .38; }
 .v2-toc:not(.arc-nav) {
     max-width: 760px;
     margin: 0 auto 65px;
 }
-.v2-toc:not(.arc-nav) > h2 {
-    margin: 0 0 24px;
-    color: var(--text-bright);
-    text-align: center;
-    font: 600 2.05rem/1.2 'Cormorant Garamond', Georgia, serif;
-    letter-spacing: .02em;
-}
 .v2-episode-chapters {
-    padding: 28px 30px 29px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: linear-gradient(180deg, var(--bg-secondary), transparent);
+    padding: 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+}
+.v2-episode-chapter-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 5px 18px;
+    margin: 0 0 11px;
+    padding: 14px 2px 0;
+}
+.v2-episode-chapter-heading h2 {
+    margin: 0;
+    color: var(--text-bright);
+    font: 600 1.67rem/1.25 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: .02em;
 }
 .chapter-list {
     list-style: none;
@@ -207,41 +216,46 @@
 }
 .chapter-list li + li { border-top: 1px solid var(--border); }
 .chapter-list a {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(84px, 106px) minmax(0, 1fr);
     align-items: baseline;
-    gap: 13px;
-    padding: 17px 5px;
+    gap: 16px;
+    padding: 14px 3px;
     color: var(--text-main);
     text-decoration: none;
-    transition: color .2s ease, padding-left .2s ease;
+    transition: color .2s ease;
 }
-.chapter-list a:hover { padding-left: 11px; }
-.chapter-list a:hover strong { color: var(--accent-light); }
+.chapter-list a:visited { color: var(--text-main); }
+.chapter-list a:hover,
+.chapter-list a:focus-visible { color: var(--accent-light); }
+.chapter-list a:hover strong,
+.chapter-list a:focus-visible strong { color: var(--accent-light); }
 .chapter-list a strong {
-    flex: 1;
+    min-width: 0;
     color: var(--text-bright);
-    font: 600 1.4rem/1.25 'Cormorant Garamond', Georgia, serif;
+    font: 600 1.2rem/1.3 'Cormorant Garamond', Georgia, serif;
     overflow-wrap: anywhere;
 }
 .chapter-list .outline-marker {
     color: var(--gold);
-    font: 500 .72rem/1.5 'Inter', sans-serif;
-    letter-spacing: .07em;
+    font: 500 .7rem/1.6 'Inter', sans-serif;
+    letter-spacing: .02em;
     white-space: nowrap;
 }
 .reader-primary {
-    display: block;
-    padding: 20px 8px 12px;
-    background: transparent;
+    display: inline-block;
+    padding: 0;
+    background: none;
     border: 0;
     border-radius: 0;
-    color: var(--accent-light);
-    text-align: center;
+    color: var(--gold);
+    text-align: right;
     text-decoration: none;
-    font: 600 1.45rem/1.3 'Cormorant Garamond', Georgia, serif;
-    transition: color .2s;
+    font: 500 .79rem/1.5 'Inter', sans-serif;
+    letter-spacing: .01em;
 }
-.reader-primary:hover { color: var(--text-bright); }
+.reader-primary:visited { color: var(--gold); }
+.reader-primary:hover { color: var(--text-bright); text-decoration: underline; text-underline-offset: 3px; }
 .reader-hint {
     margin: 3px 0 0;
     color: var(--text-dim);
@@ -250,12 +264,12 @@
 }
 
 /* Keep the original novel text and drop cap without introducing UI chrome. */
-.v2-reading-body { min-height: 120px; }
+.v2-reading-body { min-height: 120px; font-size: 1.07em; line-height: 1.86; }
 .v2-reading-body h3 {
     margin: 32px 0;
     color: var(--text-bright);
     text-align: center;
-    font: 600 1.5rem/1.5 'Cinzel', Georgia, serif;
+    font: 600 1.38rem/1.5 'Cinzel', Georgia, serif;
 }
 .v2-reading-body blockquote {
     margin: 24px 0;
@@ -312,19 +326,9 @@
 }
 .v2-chapter-nav .nav-name {
     color: var(--text-bright);
-    font: 600 1.4rem/1.25 'Cormorant Garamond', Georgia, serif;
+    font: 600 1.27rem/1.25 'Cormorant Garamond', Georgia, serif;
 }
-.v2-backlinks {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 9px 25px;
-    margin: 38px 0 65px;
-    font: italic 1.13rem/1.4 'Cormorant Garamond', Georgia, serif;
-}
-.v2-backlinks a { color: var(--gold); text-underline-offset: 4px; }
-.v2-backlinks a:hover { color: var(--text-bright); }
-.v2-footer { margin-top: 70px; }
+.v2-footer { margin-top: 50px; }
 
 /* Restore the original floating icon controls, exclusively on reading pages. */
 .reader-tools {
@@ -443,11 +447,11 @@ body.reader-immersive .v2-reading-body {
 @media (max-width: 768px) {
     .reader-topbar { margin: 0 17px; padding: 17px 1px; }
     .v2-main { padding: 15px 18px 76px; }
-    .v2-hero { padding: 40px 15px 35px; margin-bottom: 43px; }
-    .v2-synopsis { padding: 30px 25px; margin-bottom: 50px; }
-    .v2-library.arc-nav { padding: 25px 18px; margin-bottom: 55px; }
+    .v2-hero { padding: 32px 15px 25px; margin-bottom: 35px; }
+    .v2-synopsis { padding: 28px 24px; margin-bottom: 42px; }
+    .v2-library.arc-nav { padding: 24px 18px; margin-bottom: 48px; }
     .v2-parts-grid { grid-template-columns: minmax(0, 1fr); gap: 15px; }
-    .v2-arc-shelf { padding: 20px 18px 23px; }
+    .v2-arc-shelf { padding: 18px 17px 21px; }
     .v2-arc-shelf .episode-cards { grid-template-columns: minmax(0,1fr); }
     .v2-chapter-nav { flex-direction: column; gap: 5px; margin-top: 50px; }
 }
@@ -457,19 +461,20 @@ body.reader-immersive .v2-reading-body {
     .reader-topbar-links a { font-size: .66rem; }
     .reader-logo { font-size: .68rem; letter-spacing: .12em; }
     .v2-main { padding: 13px 13px 80px; }
-    .v2-hero { padding: 35px 8px 31px; margin-bottom: 37px; }
-    .v2-hero h1 { font-size: clamp(1.95rem, 9vw, 2.8rem); letter-spacing: .035em; }
+    .v2-hero { padding: 30px 8px 24px; margin-bottom: 32px; }
+    .v2-hero h1 { font-size: clamp(1.95rem, 8vw, 2.45rem); letter-spacing: .035em; }
     .v2-hero .meta { gap: 5px; }
     .v2-synopsis { padding: 26px 21px; }
-    .v2-library.arc-nav { padding: 23px 13px; }
-    .v2-library-eyebrow { font-size: .57rem; letter-spacing: .13em; }
-    .v2-library-title { font-size: 2.55rem; }
-    .v2-part-card { padding: 24px 19px 19px; }
-    .v2-part-card .arc-card-title { font-size: 1.18em; letter-spacing: .09em; }
-    .v2-arc-heading a { font-size: 1.42rem; }
-    .v2-episode-chapters { padding: 20px 17px; }
-    .chapter-list a { flex-wrap: wrap; }
-    .chapter-list a strong { flex-basis: 100%; }
+    .v2-library.arc-nav { padding: 20px 13px; }
+    .v2-library-title { font-size: 2.2rem; }
+    .v2-part-card { padding: 20px 17px 17px; }
+    .v2-part-card .arc-card-title { font-size: 1.1em; letter-spacing: .08em; }
+    .v2-arc-heading a { font-size: 1.33rem; }
+    .v2-episode-chapters { padding: 0; }
+    .v2-episode-chapter-heading h2 { font-size: 1.5rem; }
+    .chapter-list a { grid-template-columns: minmax(76px, 92px) minmax(0, 1fr); gap: 11px; padding: 14px 1px; }
+    .chapter-list a strong { font-size: 1.13rem; }
+    .v2-episode-header .ep-title-en { font-size: 1.77em; letter-spacing: .07em; }
     .reader-tools { left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); gap: 6px; }
     .reader-tools button, .reader-tools a { width: 40px; height: 40px; }
     .reader-tools svg { width: 18px; height: 18px; }
