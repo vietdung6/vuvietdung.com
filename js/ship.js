@@ -114,18 +114,16 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
 (function buildCanopy() {
   const CY = 2.55, CZ = -8.0;
 
-  /* Light cyan canopy glass — transparent enough to read the cockpit from outside */
-  const glassExteriorMat = new THREE.MeshPhysicalMaterial({
+  /* Visible pale-cyan canopy glass. Keep it transparent, but do not let
+     the black space background make the panes disappear. */
+  const glassExteriorMat = new THREE.MeshStandardMaterial({
     color: 0x8fefff,
-    roughness: 0.10,
-    metalness: 0.08,
-    transmission: 0.72,
+    emissive: 0x163843,
+    emissiveIntensity: 0.72,
+    roughness: 0.16,
+    metalness: 0.10,
     transparent: true,
-    opacity: 0.32,
-    ior: 1.32,
-    thickness: 0.10,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.04,
+    opacity: 0.42,
     side: THREE.DoubleSide,
     depthWrite: false
   });
