@@ -33,6 +33,9 @@ try {
     $safe = v2_sanitize_html($unsafe);
     editor_assert(str_contains($safe,'<strong>đậm</strong>'), 'Keep bold');
     editor_assert(str_contains($safe,'class="highlight-red"'), 'Keep red');
+    $font = v2_sanitize_html('<p><font color="#e53935">Đỏ</font> và <font color="#f5f2eb">Sáng</font></p>');
+    editor_assert(str_contains($font,'class="highlight-red"'), 'Keep native editor red');
+    editor_assert(str_contains($font,'class="highlight-bright"'), 'Keep native editor bright');
     editor_assert(str_contains($safe,'class="scene-break"'), 'Keep scene separator');
     editor_assert(str_contains($safe,'<strong><em>Nhấn</em></strong>') ||
         str_contains($safe,'<em><strong>Nhấn</strong></em>'), 'Keep Word bold and italic');
@@ -41,6 +44,7 @@ try {
     }
     editor_assert(v2_sanitize_html($safe) === $safe, 'Sanitizer idempotence');
     editor_assert(!v2_text_visible('<p><br></p>','html'), 'Cannot publish empty editor');
+    editor_assert(!v2_text_visible('<p>&nbsp;</p>','html'), 'Whitespace-only editor is empty');
     editor_assert(!v2_text_visible('<p class="scene-break">✦ ✦ ✦</p>','html'),
         'Separator alone is empty');
     editor_assert(v2_text_visible('<p>Truyện thật</p>','html'), 'Prose can publish');
