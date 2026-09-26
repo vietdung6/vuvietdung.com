@@ -1,10 +1,10 @@
 /*
- * OXYTOCIN reader v2 · return to the original Noir design language.
- * The legacy stylesheet supplies the palette, Cinzel/Cormorant/Crimson typography,
- * hero, narrative text and original card components. This sheet only bridges v2.
+ * OXYTOCIN v2 public reader.
+ * The original ../styles.css owns the Noir palette, prose typography,
+ * cover cards, episode cards and headings. Only v2-specific layout is here.
  */
 
-/* Discreet navigation. It should never compete with the novel's cover. */
+/* The cover uses the same uninterrupted opening as the original site. */
 .reader-topbar {
     position: relative;
     z-index: 2;
@@ -15,421 +15,247 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 20px;
 }
 .reader-logo {
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: .76rem;
-    line-height: 1.4;
-    font-weight: 700;
-    letter-spacing: .22em;
     color: var(--gold);
+    font: 700 .78rem/1.4 'Cinzel', Georgia, serif;
+    letter-spacing: .18em;
     text-decoration: none;
 }
-.reader-topbar nav {
+.reader-topbar-links {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 25px;
+    flex-wrap: wrap;
+    gap: 24px;
 }
-.reader-topbar nav a {
-    font: 500 .71rem/1.5 'Inter', sans-serif;
-    letter-spacing: .08em;
+.reader-topbar-links a {
     color: var(--text-dim);
+    font: 500 .72rem/1.5 'Inter', sans-serif;
+    letter-spacing: .07em;
     text-decoration: none;
-    transition: color .2s ease;
 }
-.reader-topbar nav a:hover,
-.reader-logo:hover { color: var(--accent-light); }
+.reader-topbar a:hover { color: var(--accent-light); }
 .reader-topbar a[hidden] { display: none; }
-
-/* Restore the original title and synopsis proportions. */
 .v2-main { min-height: 60vh; padding-top: 15px; }
 .v2-hero { padding: 60px 20px 50px; margin-bottom: 60px; }
 .v2-hero h1 {
     font-size: clamp(2.6rem, 6.5vw, 3.2em);
-    letter-spacing: clamp(2px, .65vw, 6px);
+    letter-spacing: clamp(2px, .6vw, 6px);
     overflow-wrap: anywhere;
 }
-.v2-hero .brand { letter-spacing: 8px; }
-.v2-hero .subtitle { margin-bottom: 30px; }
 .v2-synopsis { margin-bottom: 70px; }
-.v2-toc.arc-nav { margin-bottom: 70px; }
-.v2-toc.arc-nav > .arc-nav-label { margin-bottom: 25px; }
 
-/*
- * Front cover: the same paired chapter/part cards as the original site.
- * Native details keeps the full v2 Part → Arc → Episode → Chapter tree.
- */
+/* An actual table of contents: one carefully composed heading and book covers. */
+.v2-library.arc-nav { margin-bottom: 70px; }
+.v2-library-heading {
+    margin: 0 0 30px;
+    padding: 0 0 5px;
+    text-align: center;
+}
+.v2-library-upper {
+    min-height: 19px;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+}
+.v2-library-eyebrow {
+    color: var(--gold);
+    font: 500 .63rem/1.6 'Inter', sans-serif;
+    letter-spacing: .23em;
+    text-transform: uppercase;
+}
+.v2-continue {
+    color: var(--accent-light);
+    font: 400 .9rem/1.5 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-accent);
+}
+.v2-continue:hover { border-bottom-color: var(--gold); }
+.v2-continue[hidden] { display: none; }
+.v2-library-title {
+    margin: 7px 0 10px;
+    color: var(--text-bright);
+    font: 600 clamp(2.45rem, 5vw, 3.1rem)/1.2 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: .035em;
+    text-transform: none;
+}
+.v2-library-rule,
+.v2-rule {
+    width: 128px;
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
 .v2-parts-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
     gap: 18px;
 }
-.v2-part-card {
-    display: block;
-    min-width: 0;
-    margin: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: border-color .3s ease, box-shadow .3s ease;
+.v2-part-card { min-width: 0; }
+.v2-part-card .arc-card-title { overflow-wrap: anywhere; }
+.v2-part-card .arc-card-desc {
+    font: 1.04rem/1.65 'Crimson Pro', Georgia, serif;
 }
-.v2-part-card:hover,
-.v2-part-card[open] {
-    border-color: var(--border-accent);
-    box-shadow: 0 12px 36px rgba(0,0,0,.26);
+.v2-part-card .arc-card-meta { margin-top: auto; }
+.v2-card-open {
+    color: var(--accent-light);
+    font: italic 1.14rem/1.2 'Cormorant Garamond', Georgia, serif;
 }
-.v2-part-card > .v2-part-summary {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 30px 28px 24px;
-    min-height: 268px;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
-    background: var(--bg-card);
-    list-style: none;
-    cursor: pointer;
-    text-align: left;
-    transition: background .3s ease;
-}
-.v2-part-summary::-webkit-details-marker { display: none; }
-.v2-part-summary::marker { content: ''; }
-.v2-part-card > .v2-part-summary:hover {
-    transform: none;
-    box-shadow: none;
-    background: var(--bg-card-hover);
-}
-.v2-part-card > .v2-part-summary:focus-visible,
-.outline-arc > summary:focus-visible {
+.v2-part-card:hover .v2-card-open { color: var(--text-bright); }
+.v2-part-card:focus-visible,
+.episode-card:focus-visible,
+.reader-primary:focus-visible {
     outline: 2px solid var(--gold);
-    outline-offset: -4px;
+    outline-offset: 3px;
 }
-.v2-part-summary .arc-card-title {
-    display: block;
-    overflow-wrap: anywhere;
+.reader-empty {
+    margin: 0;
+    padding: 28px 16px 35px;
+    color: var(--text-dim);
+    font: italic 1.22rem/1.5 'Cormorant Garamond', Georgia, serif;
+    text-align: center;
 }
-.v2-part-summary .arc-card-subtitle { display: block; }
-.v2-part-summary .arc-card-desc {
-    display: block;
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 1.03rem;
-    line-height: 1.65;
-}
-.v2-part-summary .arc-card-meta { margin-top: auto; }
-.v2-part-summary .arc-card-count {
-    font-size: .69rem;
-    letter-spacing: .06em;
-}
-.v2-part-summary .arc-card-arrow { flex: 0 0 34px; }
-.v2-part-summary .arc-card-arrow svg {
-    transition: transform .3s ease;
-}
-.v2-part-card[open] {
-    grid-column: 1 / -1;
-}
-.v2-part-card[open] > .v2-part-summary {
-    min-height: 0;
-    padding: 24px 28px 22px;
-}
-.v2-part-card[open] .arc-card-arrow svg { transform: rotate(90deg); }
-.v2-part-card[open] .arc-card-desc { max-width: 580px; }
-.v2-part-card[open] .arc-card-meta { margin-top: 16px; }
-.v2-part-interior {
-    padding: 22px 28px 29px;
-    border-top: 1px solid var(--border);
-    background: linear-gradient(180deg, var(--bg-secondary), var(--bg-card) 70%);
-}
+.reader-empty h1 { color: var(--text-bright); }
 
-/* An editorial index: hairlines and type, not cards inside more cards. */
-.v2-shelf-head {
+/* One page per Part, with the original grouped Arc/episode-card layout. */
+.v2-arc-shelf { padding: 25px 26px 28px; margin: 0 0 35px; }
+.v2-arc-heading {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 8px 20px;
-    padding: 0 0 16px;
+    gap: 7px 13px;
+    padding-bottom: 6px;
+    margin-bottom: 19px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
 }
-.v2-shelf-label,
-.mini-toc-label,
-.v2-toc:not(.arc-nav) > h2 {
-    font-family: 'Cinzel', Georgia, serif;
-    font-size: .76rem;
-    font-weight: 600;
-    letter-spacing: .16em;
+.v2-arc-index {
+    color: var(--gold);
+    font: 500 .7rem/1.5 'Inter', sans-serif;
+    letter-spacing: .14em;
+    white-space: nowrap;
     text-transform: uppercase;
-    color: var(--gold);
 }
-.outline-open {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    width: fit-content;
-    margin: 0;
-    padding: 3px 0;
-    border-bottom: 1px solid transparent;
-    color: var(--accent-light);
-    font: 500 .68rem/1.5 'Inter', sans-serif;
-    letter-spacing: .055em;
-    text-decoration: none;
-    transition: border-color .2s, color .2s;
-}
-.outline-open:hover { border-bottom-color: var(--gold); color: var(--text-bright); }
-.outline-arc {
-    display: block;
-    margin: 0;
-    border-top: 1px solid var(--border);
-    background: transparent;
-}
-.outline-arc > summary {
-    display: grid;
-    grid-template-columns: 77px minmax(0, 1fr) auto 16px;
-    gap: 14px;
-    align-items: center;
-    padding: 18px 6px;
-    list-style: none;
-    cursor: pointer;
-    transition: background .2s ease;
-}
-.outline-arc > summary::-webkit-details-marker { display: none; }
-.outline-arc > summary::marker { content: ''; }
-.outline-arc > summary::after {
-    content: '⌄';
-    color: var(--gold);
-    font: 26px/1 'Cormorant Garamond', Georgia, serif;
-    text-align: center;
-    transform: translateY(-3px);
-    transition: transform .2s ease;
-}
-.outline-arc[open] > summary::after { transform: rotate(180deg) translateY(3px); }
-.outline-arc > summary:hover { background: rgba(201,169,110,.045); }
-.outline-marker {
-    color: var(--gold);
-    font: 600 .66rem/1.5 'Inter', sans-serif;
-    letter-spacing: .11em;
-    white-space: nowrap;
-}
-.outline-arc > summary strong {
-    min-width: 0;
-    font: 600 1.4rem/1.1 'Cormorant Garamond', Georgia, serif;
+.v2-arc-heading a {
     color: var(--text-bright);
+    font: 600 1.65rem/1.2 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: .015em;
+    text-decoration: none;
     overflow-wrap: anywhere;
 }
-.outline-meta {
-    color: var(--text-dim);
-    font: 400 .69rem/1.4 'Inter', sans-serif;
-    letter-spacing: .01em;
-    white-space: nowrap;
-}
-.outline-arc > .outline-interior {
-    margin: 0 0 23px 29px;
-    padding: 1px 4px 0 19px;
-    border-left: 1px solid var(--border-accent);
-}
-.outline-arc > .outline-interior > .outline-open { margin: 0 0 9px; }
-.outline-episode {
-    margin: 0;
-    padding: 0 0 10px;
-    border-top: 1px solid var(--border);
-}
-.outline-episode .episode-link {
-    display: grid;
-    grid-template-columns: 77px minmax(0, 1fr) auto;
-    gap: 13px;
-    align-items: baseline;
-    padding: 16px 2px 7px;
-    color: var(--text-main);
-    text-decoration: none;
-    transition: color .2s ease;
-}
-.outline-episode .episode-link strong {
-    font: 600 1.22rem/1.25 'Cormorant Garamond', Georgia, serif;
-    color: var(--text-bright);
-    overflow-wrap: anywhere;
-}
-.outline-episode .episode-link:hover strong { color: var(--accent-light); }
-.chapter-links {
-    list-style: none;
-    margin: 0 0 2px 90px;
-    padding: 0;
-}
-.chapter-links li { border-top: 1px solid rgba(128,117,104,.15); }
-.chapter-links a {
-    display: block;
-    padding: 8px 5px;
-    color: var(--text-main);
-    font: 1.02rem/1.45 'Crimson Pro', Georgia, serif;
-    text-decoration: none;
-    transition: color .2s ease, padding-left .2s ease;
-    overflow-wrap: anywhere;
-}
-.chapter-links a:hover {
-    color: var(--accent-light);
-    padding-left: 11px;
-}
-.v2-read-episode { margin: 7px 0 6px 90px; }
-
-/* Collections: restore the old site's mini-TOC and episode-card treatment. */
-.v2-arc-shelf {
-    margin: 0 0 40px;
-    padding: 22px 26px 26px;
-}
-.v2-arc-shelf .mini-toc-label {
-    margin-bottom: 16px;
-    letter-spacing: .1em;
-    line-height: 1.6;
-}
-.v2-arc-shelf .mini-toc-label a {
-    color: var(--gold);
-    text-decoration: none;
-}
-.v2-arc-shelf .mini-toc-label a:hover { color: var(--text-bright); }
+.v2-arc-heading a:hover { color: var(--accent-light); }
+.v2-arc-shelf .mini-toc-label { line-height: 1.4; }
 .v2-arc-shelf .v2-arc-intro {
-    max-width: 690px;
-    margin: -4px 0 20px;
-    font: italic 1.13rem/1.5 'Cormorant Garamond', Georgia, serif;
+    margin: -3px 0 20px;
     color: var(--text-dim);
+    font: italic 1.2rem/1.5 'Cormorant Garamond', Georgia, serif;
 }
 .v2-arc-shelf .episode-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.v2-arc-shelf .episode-card {
-    min-width: 0;
-    padding: 24px 22px 18px;
-}
-.v2-arc-shelf .ep-card-title {
-    display: block;
-    overflow-wrap: anywhere;
-}
+.v2-arc-shelf .episode-card { min-width: 0; }
+.v2-arc-shelf .ep-card-title { overflow-wrap: anywhere; }
+.v2-arc-shelf .ep-card-sub { font-size: 1.2rem; }
 .v2-arc-shelf .ep-card-desc {
-    font: 1.01rem/1.55 'Crimson Pro', Georgia, serif;
-}
-.v2-arc-shelf .ep-card-sub {
-    font-size: 1.25rem;
-    line-height: 1.3;
+    font: 1.04rem/1.6 'Crimson Pro', Georgia, serif;
 }
 .v2-arc-shelf .ep-card-foot { margin-top: auto; }
-.v2-arc-shelf .ep-card-meta { font-size: .69rem; }
+.v2-arc-shelf .ep-card-meta { font-size: .7rem; }
+.v2-arc-shelf .mini-toc-label:not(.v2-arc-heading) {
+    color: var(--gold);
+    font-size: .74rem;
+    letter-spacing: .13em;
+}
+.v2-page-header { margin-bottom: 55px; }
+.v2-episode-header { margin-bottom: 55px; }
+.v2-rule { margin: 24px auto 28px; }
+
+/* Links, headings and rules rather than extra control panels. */
+.v2-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+}
+.v2-breadcrumb a { text-underline-offset: 3px; }
+.v2-breadcrumb .breadcrumb-sep { opacity: .38; }
 .v2-toc:not(.arc-nav) {
     max-width: 760px;
     margin: 0 auto 65px;
 }
 .v2-toc:not(.arc-nav) > h2 {
-    margin: 0 0 22px;
+    margin: 0 0 24px;
+    color: var(--text-bright);
     text-align: center;
+    font: 600 2.05rem/1.2 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: .02em;
 }
-.reader-collection {
-    margin-bottom: 15px;
-    padding: 22px 24px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    background: var(--bg-card);
-}
-.reader-collection h3 {
-    font: 600 1.35rem/1.3 'Cinzel', Georgia, serif;
-    letter-spacing: .04em;
-    margin: 7px 0;
-}
-.reader-collection h3 a { color: var(--text-bright); text-decoration: none; }
-.reader-collection h3 a:hover { color: var(--accent-light); }
-.reader-collection p {
-    margin: 7px 0;
-    color: var(--text-dim);
-    font: 1.07rem/1.5 'Crimson Pro', Georgia, serif;
-}
-.reader-collection .episode-list {
-    margin: 12px 0 0;
-    padding-left: 19px;
-}
-.reader-collection .episode-list li { padding: 4px 0; }
-.reader-collection .episode-list a { color: var(--text-main); }
-.reader-collection .episode-list a:hover { color: var(--accent-light); }
-.reader-empty {
-    margin: 0;
-    padding: 36px 16px;
-    border: 0;
-    background: transparent;
-    text-align: center;
-    color: var(--text-dim);
-    font: italic 1.14rem/1.6 'Cormorant Garamond', Georgia, serif;
-}
-.reader-empty h1 { color: var(--text-bright); }
-
-/* Chapter and episode pages remain quiet to prioritize the prose. */
-.v2-breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; }
-.v2-breadcrumb a { text-underline-offset: 3px; }
-.v2-page-header { margin-bottom: 55px; }
-.v2-episode-header { margin-bottom: 55px; }
 .v2-episode-chapters {
-    padding: 27px 30px 30px;
+    padding: 28px 30px 29px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: linear-gradient(180deg, var(--bg-secondary), transparent);
 }
 .chapter-list {
     list-style: none;
-    margin: 0 0 23px;
+    margin: 0;
     padding: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
-.chapter-list li { border-top: 1px solid var(--border); }
-.chapter-list li:last-child { border-bottom: 1px solid var(--border); }
+.chapter-list li + li { border-top: 1px solid var(--border); }
 .chapter-list a {
     display: flex;
     align-items: baseline;
     gap: 13px;
-    padding: 16px 4px;
+    padding: 17px 5px;
     color: var(--text-main);
     text-decoration: none;
     transition: color .2s ease, padding-left .2s ease;
 }
-.chapter-list a:hover { padding-left: 10px; }
+.chapter-list a:hover { padding-left: 11px; }
+.chapter-list a:hover strong { color: var(--accent-light); }
 .chapter-list a strong {
     flex: 1;
-    font: 600 1.35rem/1.25 'Cormorant Garamond', Georgia, serif;
     color: var(--text-bright);
+    font: 600 1.4rem/1.25 'Cormorant Garamond', Georgia, serif;
     overflow-wrap: anywhere;
 }
-.chapter-list a:hover strong { color: var(--accent-light); }
-.chapter-list a > span:last-child {
-    margin-left: auto;
+.chapter-list .outline-marker {
     color: var(--gold);
-    font: 1rem Georgia, serif;
+    font: 500 .72rem/1.5 'Inter', sans-serif;
+    letter-spacing: .07em;
+    white-space: nowrap;
 }
 .reader-primary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 54px;
-    padding: 13px 22px;
-    border: 1px solid var(--border-accent);
-    border-radius: 8px;
-    background: linear-gradient(120deg, var(--bg-card), var(--bg-secondary));
-    color: var(--accent-light) !important;
-    font: 600 .79rem/1.5 'Cinzel', Georgia, serif;
-    letter-spacing: .08em;
+    display: block;
+    padding: 20px 8px 12px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--accent-light);
     text-align: center;
     text-decoration: none;
-    transition: border-color .25s, box-shadow .25s, background .25s;
+    font: 600 1.45rem/1.3 'Cormorant Garamond', Georgia, serif;
+    transition: color .2s;
 }
-.reader-primary:hover {
-    border-color: var(--gold);
-    background: var(--bg-card-hover);
-    box-shadow: 0 5px 25px var(--accent-glow);
-}
+.reader-primary:hover { color: var(--text-bright); }
 .reader-hint {
-    text-align: center;
+    margin: 3px 0 0;
     color: var(--text-dim);
-    font: italic 1.08rem/1.5 'Cormorant Garamond', Georgia, serif;
+    text-align: center;
+    font: italic 1.05rem/1.5 'Cormorant Garamond', Georgia, serif;
 }
+
+/* Keep the original novel text and drop cap without introducing UI chrome. */
 .v2-reading-body { min-height: 120px; }
 .v2-reading-body h3 {
     margin: 32px 0;
-    font: 600 1.5rem/1.5 'Cinzel', Georgia, serif;
-    text-align: center;
     color: var(--text-bright);
+    text-align: center;
+    font: 600 1.5rem/1.5 'Cinzel', Georgia, serif;
 }
 .v2-reading-body blockquote {
     margin: 24px 0;
@@ -438,9 +264,6 @@
     color: var(--text-dim);
 }
 .v2-reading-body blockquote p { text-indent: 0; }
-.v2-reading-body p.center-red,
-.v2-reading-body p.beat,
-.v2-reading-body p.scene-break { font-style: normal; }
 .v2-full-chapter { margin-bottom: 85px; scroll-margin-top: 30px; }
 .v2-full-heading {
     margin: 0 auto 42px;
@@ -449,87 +272,108 @@
     text-align: center;
 }
 .v2-full-heading a {
-    font: 600 .73rem/1.5 'Inter', sans-serif;
-    letter-spacing: .12em;
     color: var(--gold);
+    font: 500 .72rem/1.5 'Inter', sans-serif;
+    letter-spacing: .1em;
     text-decoration: none;
 }
 .v2-full-heading a:hover { color: var(--text-bright); }
 .v2-full-heading h2 {
     margin: 12px 0 0;
-    font: 600 2rem/1.25 'Cinzel', Georgia, serif;
-    letter-spacing: .035em;
     color: var(--text-bright);
+    font: 600 2rem/1.25 'Cinzel', Georgia, serif;
+    letter-spacing: .03em;
     overflow-wrap: anywhere;
 }
 .v2-chapter-nav {
     display: flex;
-    gap: 15px;
-    margin-top: 75px;
+    gap: 25px;
+    margin-top: 70px;
 }
-.v2-chapter-nav .bottom-nav-btn { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.v2-chapter-nav .bottom-nav-btn.disabled { pointer-events: none; opacity: .45; }
+.v2-chapter-nav .bottom-nav-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 19px 0 15px;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
+    overflow-wrap: anywhere;
+}
+.v2-chapter-nav .bottom-nav-btn:hover:not(.disabled) {
+    transform: none;
+    box-shadow: none;
+    border-top-color: var(--gold);
+}
+.v2-chapter-nav .bottom-nav-btn.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+.v2-chapter-nav .nav-dir {
+    color: var(--gold);
+    font: 500 .68rem/1.6 'Inter', sans-serif;
+    letter-spacing: .11em;
+}
+.v2-chapter-nav .nav-name {
+    color: var(--text-bright);
+    font: 600 1.4rem/1.25 'Cormorant Garamond', Georgia, serif;
+}
 .v2-backlinks {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px 25px;
+    gap: 9px 25px;
     margin: 38px 0 65px;
-    font: italic 1.11rem/1.4 'Cormorant Garamond', Georgia, serif;
+    font: italic 1.13rem/1.4 'Cormorant Garamond', Georgia, serif;
 }
 .v2-backlinks a { color: var(--gold); text-underline-offset: 4px; }
 .v2-backlinks a:hover { color: var(--text-bright); }
 .v2-footer { margin-top: 70px; }
 
-/* Three compact reading controls, not a row of chunky CTA buttons. */
+/* Text-only reading preferences, only on actual reading pages. */
 .reader-tools {
     position: fixed;
     z-index: 200;
-    left: 24px;
-    bottom: 23px;
-    display: flex;
-    gap: 2px;
-    padding: 5px;
-    border: 1px solid var(--border-accent);
-    border-radius: 12px;
-    background: rgba(23,22,21,.96);
-    box-shadow: 0 8px 32px rgba(0,0,0,.25);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    left: 16px;
+    bottom: 16px;
+    display: none;
+    align-items: center;
+    padding: 0 5px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    box-shadow: 0 5px 22px rgba(0,0,0,.24);
 }
+body[data-reader-mode="chapter"] .reader-tools,
+body[data-reader-mode="episode"] .reader-tools { display: flex; }
 .reader-tools button,
 .reader-tools a {
     display: inline-flex;
+    min-height: 38px;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 8px;
+    padding: 0 12px;
+    border: 0;
     background: transparent;
     color: var(--text-dim);
+    font: 500 .68rem/1.25 'Inter', sans-serif;
+    letter-spacing: .025em;
     cursor: pointer;
     text-decoration: none;
-    box-shadow: none;
-    transition: background .2s, color .2s, border-color .2s;
+    transition: color .2s, background .2s;
 }
+.reader-tools button + button,
+.reader-tools button + a { border-left: 1px solid var(--border); }
 .reader-tools button:hover,
 .reader-tools a:hover,
 .reader-tools button:focus-visible,
 .reader-tools a:focus-visible {
-    background: var(--bg-card-hover);
     color: var(--accent-light);
-    border-color: var(--border);
-    outline: none;
+    background: var(--bg-card-hover);
+    outline-offset: -2px;
 }
 .reader-tools button[aria-pressed="true"] { color: var(--accent-light); }
-.reader-font-glyph {
-    font: 600 1.1rem/1 'Cormorant Garamond', Georgia, serif;
-    letter-spacing: -.05em;
-}
-.reader-font-glyph sup { font: 600 .6rem/1 'Inter', sans-serif; vertical-align: super; }
-body.theme-light .reader-tools { background: rgba(255,255,255,.94); }
 .reader-progress {
     position: fixed;
     z-index: 201;
@@ -546,67 +390,39 @@ body.theme-light .reader-tools { background: rgba(255,255,255,.94); }
     transition: width .08s linear;
 }
 
-/* Keep all the original light-theme tokens and type-scale controls. */
-body.theme-light .v2-part-card:hover,
-body.theme-light .v2-part-card[open] { box-shadow: 0 10px 30px rgba(30,20,10,.08); }
-
 @media (max-width: 768px) {
-    .reader-topbar { margin: 0 19px; padding: 16px 2px; }
-    .v2-main { padding: 15px 18px 78px; }
+    .reader-topbar { margin: 0 17px; padding: 17px 1px; }
+    .v2-main { padding: 15px 18px 76px; }
     .v2-hero { padding: 40px 15px 35px; margin-bottom: 43px; }
-    .v2-hero .brand { letter-spacing: 5px; }
     .v2-synopsis { padding: 30px 25px; margin-bottom: 50px; }
-    .v2-toc.arc-nav { padding: 25px 18px; margin-bottom: 55px; }
+    .v2-library.arc-nav { padding: 25px 18px; margin-bottom: 55px; }
     .v2-parts-grid { grid-template-columns: minmax(0, 1fr); gap: 15px; }
-    .v2-part-card[open] { grid-column: 1; }
-    .v2-part-card > .v2-part-summary { min-height: 0; padding: 26px 24px 21px; }
-    .v2-part-summary .arc-card-desc { font-size: 1.03rem; }
-    .v2-part-interior { padding: 19px 20px 24px; }
-    .outline-arc > summary { grid-template-columns: 58px minmax(0, 1fr) auto 16px; gap: 9px; }
-    .outline-arc > summary strong { font-size: 1.3rem; }
-    .outline-arc > .outline-interior { margin-left: 10px; padding-left: 15px; }
-    .outline-episode .episode-link { grid-template-columns: 59px minmax(0,1fr); gap: 9px; }
-    .outline-episode .episode-link .outline-meta { grid-column: 2; margin-top: -8px; }
-    .chapter-links { margin-left: 68px; }
-    .v2-read-episode { margin-left: 68px; }
-    .v2-arc-shelf { padding: 20px 17px 23px; }
-    .v2-arc-shelf .episode-cards { grid-template-columns: minmax(0, 1fr); }
-    .v2-chapter-nav { flex-direction: column; margin-top: 55px; }
-    .reader-tools { left: 13px; bottom: 13px; }
+    .v2-arc-shelf { padding: 20px 18px 23px; }
+    .v2-arc-shelf .episode-cards { grid-template-columns: minmax(0,1fr); }
+    .v2-chapter-nav { flex-direction: column; gap: 5px; margin-top: 50px; }
 }
-@media (max-width: 450px) {
+@media (max-width: 480px) {
     .reader-topbar { margin: 0 12px; gap: 10px; }
-    .reader-topbar nav { gap: 12px; }
-    .reader-topbar nav a { font-size: .64rem; }
-    .reader-logo { font-size: .68rem; letter-spacing: .13em; }
-    .v2-main { padding: 13px 13px 85px; }
+    .reader-topbar-links { gap: 13px; }
+    .reader-topbar-links a { font-size: .66rem; }
+    .reader-logo { font-size: .68rem; letter-spacing: .12em; }
+    .v2-main { padding: 13px 13px 80px; }
     .v2-hero { padding: 35px 8px 31px; margin-bottom: 37px; }
-    .v2-hero h1 { letter-spacing: .035em; font-size: clamp(1.9rem, 9vw, 2.8rem); }
+    .v2-hero h1 { font-size: clamp(1.95rem, 9vw, 2.8rem); letter-spacing: .035em; }
     .v2-hero .meta { gap: 5px; }
     .v2-synopsis { padding: 26px 21px; }
-    .v2-toc.arc-nav { padding: 20px 12px 25px; }
-    .v2-toc.arc-nav > .arc-nav-label { font-size: .65rem; letter-spacing: .2em; }
-    .v2-part-card > .v2-part-summary { padding: 23px 19px 19px; }
-    .v2-part-summary .arc-card-title { font-size: 1.17rem; letter-spacing: .07em; }
-    .v2-part-interior { padding: 15px 12px 20px; }
-    .outline-arc > summary { grid-template-columns: 48px minmax(0, 1fr) 15px; gap: 8px; }
-    .outline-arc > summary > .outline-meta { display: none; }
-    .outline-arc > summary strong { font-size: 1.17rem; }
-    .outline-arc > .outline-interior { margin-left: 6px; padding-left: 11px; }
-    .outline-episode .episode-link { grid-template-columns: 1fr; gap: 3px; }
-    .outline-episode .episode-link > .outline-meta { grid-column: 1; margin-top: 0; }
-    .chapter-links, .v2-read-episode { margin-left: 0; }
-    .v2-episode-chapters { padding: 19px 17px 21px; }
+    .v2-library.arc-nav { padding: 23px 13px; }
+    .v2-library-eyebrow { font-size: .57rem; letter-spacing: .13em; }
+    .v2-library-title { font-size: 2.55rem; }
+    .v2-part-card { padding: 24px 19px 19px; }
+    .v2-part-card .arc-card-title { font-size: 1.18em; letter-spacing: .09em; }
+    .v2-arc-heading a { font-size: 1.42rem; }
+    .v2-episode-chapters { padding: 20px 17px; }
     .chapter-list a { flex-wrap: wrap; }
-    .chapter-list a strong { flex-basis: calc(100% - 30px); }
-    .chapter-list a > span:last-child { align-self: center; }
-    .reader-tools button, .reader-tools a { width: 40px; height: 40px; }
+    .chapter-list a strong { flex-basis: 100%; }
+    .reader-tools { left: 10px; bottom: 10px; }
+    .reader-tools button, .reader-tools a { padding: 0 9px; font-size: .64rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .reader-progress span,
-    .v2-part-card,
-    .v2-part-summary,
-    .reader-tools button,
-    .reader-tools a,
-    .outline-arc > summary::after { transition: none; }
+    .v2-part-card, .reader-tools button, .reader-tools a, .reader-progress span { transition: none; }
 }
