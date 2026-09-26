@@ -5,6 +5,8 @@
   const fontKey = 'reading_fontsize';
   const themeButton = document.getElementById('readerTheme');
   const fontButton = document.getElementById('readerFont');
+  const fullscreenButton = document.getElementById('readerFullscreen');
+  const readingControls = document.querySelector('.reader-tools');
   const continueLink = document.getElementById('continueReading');
   const progressBar = document.getElementById('readerProgressBar');
   const fontClasses = ['', 'font-large', 'font-xl'];
@@ -68,6 +70,57 @@
     updateScroll();
   });
 
+  // Fullscreen is progressive enhancement. iPhone browsers that do not support
+  // element fullscreen still get the same distraction-free reader layout.
+  let nativeFullscreenActive = false;
+  function updateFullscreenButton() {
+    if (!fullscreenButton) return;
+    const active = document.body.classList.contains('reader-immersive');
+    fullscreenButton.setAttribute('aria-pressed', String(active));
+    fullscreenButton.textContent = active ? 'Thoát' : 'Toàn màn hình';
+    fullscreenButton.title = active ? 'Thoát chế độ đọc toàn màn hình' : 'Bật chế độ đọc toàn màn hình';
+    fullscreenButton.setAttribute('aria-label', fullscreenButton.title);
+  }
+  function setImmersive(active) {
+    document.body.classList.toggle('reader-immersive', active);
+    updateFullscreenButton();
+    updateScroll();
+  }
+  fullscreenButton?.addEventListener('click', () => {
+    if (document.body.classList.contains('reader-immersive')) {
+      setImmersive(false);
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      return;
+    }
+    setImmersive(true);
+    if (document.fullscreenEnabled && document.documentElement.requestFullscreen) {
+      try {
+        // Request fullscreen directly in the click handler: browsers require a gesture.
+        const request = document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+        request.then(() => { nativeFullscreenActive = true; })
+          .catch(() => { /* Keep the CSS-only reading mode. */ });
+      } catch (_) {
+        // The CSS-only layout remains usable when fullscreen is restricted.
+      }
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+      nativeFullscreenActive = true;
+    } else if (nativeFullscreenActive) {
+      nativeFullscreenActive = false;
+      setImmersive(false);
+    }
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' &&
+        document.body.classList.contains('reader-immersive') &&
+        !document.fullscreenElement) setImmersive(false);
+  });
+  updateFullscreenButton();
+
   function findCurrentBlock() {
     if (!chapterBlocks.length) return null;
     let active = chapterBlocks[0];
@@ -96,6 +149,10 @@
       const height = Math.max(1, document.documentElement.scrollHeight - innerHeight);
       progressBar.style.width = (bounded(window.scrollY / height, 0, 1) * 100) + '%';
     }
+    // Like the original reader, quiet controls appear once reading has begun.
+    readingControls?.classList.toggle('visible',
+      ['chapter', 'episode'].includes(currentMode) &&
+      (window.scrollY > 260 || document.body.classList.contains('reader-immersive')));
   }
 
   const previous = readProgress();
