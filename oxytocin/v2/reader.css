@@ -264,26 +264,21 @@
     color: var(--text-dim);
 }
 .v2-reading-body blockquote p { text-indent: 0; }
-.v2-full-chapter { margin-bottom: 85px; scroll-margin-top: 30px; }
-.v2-full-heading {
-    margin: 0 auto 42px;
-    padding: 0 0 25px;
-    border-bottom: 1px solid var(--border);
-    text-align: center;
+/* Full-episode mode is one uninterrupted reading surface. Only a fine
+   editorial rule separates two chapters; no duplicated title cards. */
+.v2-full-chapter {
+    margin: 0;
+    scroll-margin-top: 30px;
 }
-.v2-full-heading a {
-    color: var(--gold);
-    font: 500 .72rem/1.5 'Inter', sans-serif;
-    letter-spacing: .1em;
-    text-decoration: none;
-}
-.v2-full-heading a:hover { color: var(--text-bright); }
-.v2-full-heading h2 {
-    margin: 12px 0 0;
-    color: var(--text-bright);
-    font: 600 2rem/1.25 'Cinzel', Georgia, serif;
-    letter-spacing: .03em;
-    overflow-wrap: anywhere;
+.v2-full-chapter + .v2-full-chapter { margin-top: 46px; }
+.v2-chapter-divider {
+    display: block;
+    width: min(190px, 46%);
+    height: 1px;
+    border: 0;
+    padding: 0;
+    margin: 0 auto 46px;
+    background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
 }
 .v2-chapter-nav {
     display: flex;
@@ -427,9 +422,6 @@ body.reader-immersive .v2-reading-body {
     max-width: 760px;
     font-size: 1.16em;
     line-height: 1.96;
-}
-body.reader-immersive .v2-full-chapter:first-of-type .v2-full-heading {
-    margin-top: 0;
 }
 :root:fullscreen { background: var(--bg-color); }
 .reader-progress {
