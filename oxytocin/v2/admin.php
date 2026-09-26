@@ -175,7 +175,7 @@ unset($_SESSION['flash']);
     $arcs = v2_rows($db, 'arcs');
     $episodes = v2_rows($db, 'episodes');
     $chapters = v2_numbered_chapters($db);
-    $rows = ['parts'=>$parts,'arcs'=>$arcs,'episodes'=>$episodes,'chapters'=>$chapters][$tab];
+    $rows = ['parts'=>$parts,'arcs'=>$arcs,'episodes'=>$episodes,'chapters'=>$chapters,'settings'=>[]][$tab];
     $editId = v2_num($_GET['edit'] ?? '0');
     $edit = null;
     foreach ($rows as $row) if ((int)$row['id'] === $editId) $edit = $row;
