@@ -183,3 +183,35 @@ jobs:
               exit 1
               ;;
           esac
+
+      - name: Smoke test OXYTOCIN v2 and block SQLite downloads
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          v2_code=$(curl --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
+            --location --output .deploy/v2-index.html --write-out "%{http_code}" \
+            https://vuvietdung.com/oxytocin/v2/index.php)
+          if [ "$v2_code" != 200 ] || ! grep -Fq "OXYTOCIN" .deploy/v2-index.html; then
+            echo "::error::OXYTOCIN v2 reader is not responding correctly (HTTP $v2_code)."
+            exit 1
+          fi
+          echo "OXYTOCIN v2 public reader responds HTTP 200."
+
+          admin_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
+            --location --output .deploy/v2-admin.html --write-out "%{http_code}" \
+            https://vuvietdung.com/oxytocin/v2/admin.php)
+          if [ "$admin_code" != 200 ] || ! grep -Fq "Đăng nhập admin OXYTOCIN" .deploy/v2-admin.html; then
+            echo "::error::OXYTOCIN v2 admin login gateway is not responding correctly (HTTP $admin_code)."
+            exit 1
+          fi
+          echo "OXYTOCIN v2 admin login gateway responds HTTP 200."
+
+          # Drop the response body. Never log or archive database bytes.
+          database_code=$(curl --silent --show-error --connect-timeout 10 --max-time 30 \
+            --output /dev/null --write-out "%{http_code}" \
+            https://vuvietdung.com/oxytocin/v2/.data/oxytocin_v2.db)
+          case "$database_code" in
+            403|404) echo "Direct SQLite download denied: HTTP $database_code." ;;
+            *) echo "::error::Private SQLite endpoint exposed or unavailable: HTTP $database_code."; exit 1 ;;
+          esac
