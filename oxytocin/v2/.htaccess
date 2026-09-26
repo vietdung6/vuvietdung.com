@@ -1,3 +1,7 @@
 <FilesMatch "^(?:lib\.php|init\.php|schema\.sql|README\.md)$">
     Require all denied
 </FilesMatch>
+
+<FilesMatch "^(?:backup-legacy\.php|public\.php|render\.php|\.env(?:\..*)?)$">
+    Require all denied
+</FilesMatch>
