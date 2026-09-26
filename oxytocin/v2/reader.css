@@ -331,49 +331,98 @@
 .v2-backlinks a:hover { color: var(--text-bright); }
 .v2-footer { margin-top: 70px; }
 
-/* Text-only reading preferences, only on actual reading pages. */
+/* Restore the old, individually floating reading controls. Text, no icons. */
 .reader-tools {
     position: fixed;
     z-index: 200;
-    left: 16px;
-    bottom: 16px;
+    left: max(16px, env(safe-area-inset-left));
+    bottom: max(18px, env(safe-area-inset-bottom));
     display: none;
     align-items: center;
-    padding: 0 5px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg-secondary);
-    box-shadow: 0 5px 22px rgba(0,0,0,.24);
+    gap: 9px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(7px);
+    transition: opacity .25s ease, transform .25s ease, visibility .25s ease;
 }
 body[data-reader-mode="chapter"] .reader-tools,
 body[data-reader-mode="episode"] .reader-tools { display: flex; }
+.reader-tools.visible,
+body.reader-immersive .reader-tools {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+}
 .reader-tools button,
 .reader-tools a {
     display: inline-flex;
-    min-height: 38px;
     align-items: center;
     justify-content: center;
-    padding: 0 12px;
-    border: 0;
-    background: transparent;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--bg-card);
     color: var(--text-dim);
-    font: 500 .68rem/1.25 'Inter', sans-serif;
-    letter-spacing: .025em;
-    cursor: pointer;
+    font: 500 .67rem/1.15 'Inter', sans-serif;
+    letter-spacing: 0;
     text-decoration: none;
-    transition: color .2s, background .2s;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark);
+    transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
 }
-.reader-tools button + button,
-.reader-tools button + a { border-left: 1px solid var(--border); }
 .reader-tools button:hover,
 .reader-tools a:hover,
 .reader-tools button:focus-visible,
 .reader-tools a:focus-visible {
     color: var(--accent-light);
+    border-color: var(--border-accent);
     background: var(--bg-card-hover);
-    outline-offset: -2px;
+    transform: translateY(-2px);
 }
-.reader-tools button[aria-pressed="true"] { color: var(--accent-light); }
+.reader-tools button:focus-visible,
+.reader-tools a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.reader-tools button[aria-pressed="true"] {
+    border-color: var(--border-accent);
+    color: var(--accent-light);
+}
+.reader-tools a {
+    width: 70px;
+    border-radius: 24px;
+}
+.reader-tools #readerFullscreen {
+    width: 107px;
+    border-radius: 24px;
+}
+body.theme-light .reader-tools button,
+body.theme-light .reader-tools a { box-shadow: 0 3px 13px rgba(0,0,0,.13); }
+
+/* Fullscreen supported: browser chrome can disappear. Unsupported (notably some
+   iOS versions): the same page becomes a distraction-free immersive reader. */
+body.reader-immersive .reader-topbar,
+body.reader-immersive .v2-breadcrumb,
+body.reader-immersive .v2-episode-header,
+body.reader-immersive .v2-backlinks,
+body.reader-immersive .v2-footer { display: none; }
+body.reader-immersive .v2-main {
+    max-width: 980px;
+    min-height: 100dvh;
+    padding-top: clamp(30px, 5vh, 64px);
+    padding-bottom: 95px;
+}
+body.reader-immersive .v2-reading-body {
+    max-width: 760px;
+    font-size: 1.16em;
+    line-height: 1.96;
+}
+body.reader-immersive .v2-full-chapter:first-of-type .v2-full-heading {
+    margin-top: 0;
+}
+:root:fullscreen { background: var(--bg-color); }
 .reader-progress {
     position: fixed;
     z-index: 201;
@@ -420,8 +469,10 @@ body[data-reader-mode="episode"] .reader-tools { display: flex; }
     .v2-episode-chapters { padding: 20px 17px; }
     .chapter-list a { flex-wrap: wrap; }
     .chapter-list a strong { flex-basis: 100%; }
-    .reader-tools { left: 10px; bottom: 10px; }
-    .reader-tools button, .reader-tools a { padding: 0 9px; font-size: .64rem; }
+    .reader-tools { left: max(10px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); gap: 6px; }
+    .reader-tools button { width: 40px; height: 40px; font-size: .62rem; }
+    .reader-tools a { width: 65px; height: 40px; font-size: .62rem; }
+    .reader-tools #readerFullscreen { width: 102px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .v2-part-card, .reader-tools button, .reader-tools a, .reader-progress span { transition: none; }
