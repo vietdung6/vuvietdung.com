@@ -143,10 +143,14 @@ function v2_reader_open(string $title, string $mode = '', int $chapterId = 0, in
 }
 
 function v2_reader_close(): void {
-    echo '</main><div class="reader-tools" aria-label="Tùy chỉnh việc đọc">'
-        . '<button type="button" id="readerTheme" title="Đổi nền sáng/tối">Nền</button>'
-        . '<button type="button" id="readerFont" title="Chỉnh cỡ chữ">A±</button>'
-        . '<a href="index.php" title="Về mục lục">☰</a></div>'
+    echo '<footer class="v2-footer"><div class="signature">✦ VVD WORKS ✦</div>'
+        . '<p>© OXYTOCIN</p></footer></main>'
+        . '<div class="reader-tools" aria-label="Tùy chỉnh việc đọc">'
+        . '<button type="button" id="readerTheme" title="Đổi nền sáng / tối" aria-label="Đổi nền sáng / tối">'
+        . '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.8A8.7 8.7 0 0 1 8.2 3.8 8.7 8.7 0 1 0 20.2 15.8Z"/></svg></button>'
+        . '<button type="button" id="readerFont" title="Đổi cỡ chữ" aria-label="Đổi cỡ chữ"><span class="reader-font-glyph" aria-hidden="true">Aa<sup>+</sup></span></button>'
+        . '<a href="index.php" title="Về mục lục" aria-label="Về mục lục">'
+        . '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></a></div>'
         . '<div class="reader-progress" aria-hidden="true"><span id="readerProgressBar"></span></div>'
         . '</body></html>';
 }

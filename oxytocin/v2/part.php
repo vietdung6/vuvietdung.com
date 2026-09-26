@@ -14,21 +14,34 @@ v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
     <div class="page-label"><?= v2_h($part['badge'] ?: 'Phần ' . $part['num']) ?></div>
     <h1 class="page-title"><?= v2_h($part['en'] ?: $part['vi']) ?></h1>
     <?php if ($part['en'] && $part['vi']): ?><div class="page-subtitle"><?= v2_h($part['vi']) ?></div><?php endif; ?>
+    <div class="page-divider"><span></span>✦<span></span></div>
     <?php if ($part['description']): ?><p class="page-intro"><?= nl2br(v2_h($part['description'])) ?></p><?php endif; ?>
 </header>
-<section class="v2-toc">
-    <h2>Danh sách Arc</h2>
+<section class="v2-part-shelves" aria-label="Danh sách Arc">
     <?php foreach ($part['arcs'] as $arc): ?>
-        <article class="reader-collection">
-            <div class="outline-marker">Arc <?= $arc['num'] ?></div>
-            <h3><a href="arc.php?id=<?= $arc['id'] ?>"><?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?></a></h3>
-            <p><?= count($arc['episodes']) ?> tập đã có chương được đăng</p>
-            <ol class="episode-list">
-                <?php foreach ($arc['episodes'] as $episode): ?>
-                <li><a href="episode.php?id=<?= $episode['id'] ?>">Tập <?= $episode['num'] ?><?= v2_display_title($episode['en'],$episode['vi']) !== '' ? ' — ' . v2_h(v2_display_title($episode['en'],$episode['vi'])) : '' ?></a></li>
-                <?php endforeach; ?>
-            </ol>
-        </article>
+    <section class="mini-toc v2-arc-shelf">
+        <div class="mini-toc-label"><a href="arc.php?id=<?= $arc['id'] ?>">Arc <?= $arc['num'] ?> · <?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?> ↗</a></div>
+        <?php if ($arc['intro']): ?><p class="v2-arc-intro"><?= v2_h($arc['intro']) ?></p><?php endif; ?>
+        <div class="episode-cards">
+            <?php foreach ($arc['episodes'] as $episode): ?>
+            <a class="episode-card" href="episode.php?id=<?= $episode['id'] ?>">
+                <div class="ep-card-top">
+                    <span class="ep-card-idx"><?= str_pad((string)$episode['num'], 2, '0', STR_PAD_LEFT) ?></span>
+                    <span class="ep-card-badge">Tập <?= $episode['num'] ?></span>
+                </div>
+                <div class="ep-card-titles">
+                    <h3 class="ep-card-title"><?= v2_h($episode['en'] ?: $episode['vi'] ?: 'Tập ' . $episode['num']) ?></h3>
+                    <?php if ($episode['en'] && $episode['vi']): ?><div class="ep-card-sub"><?= v2_h($episode['vi']) ?></div><?php endif; ?>
+                </div>
+                <?php if ($episode['summary']): ?><p class="ep-card-desc"><?= v2_h($episode['summary']) ?></p><?php endif; ?>
+                <div class="ep-card-foot">
+                    <span class="ep-card-meta"><?= count($episode['chapters']) ?> chương</span>
+                    <span class="ep-card-arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
     <?php endforeach; ?>
 </section>
 <?php v2_reader_close(); ?>
