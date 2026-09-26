@@ -47,8 +47,15 @@ grep -q 'Tập 0' "$test_dir/part.html"
 grep -q 'Chương 1' "$test_dir/episode.html"
 grep -q 'Chương 2' "$test_dir/episode.html"
 grep -q 'Chương 3' "$test_dir/chapter4.html"
-for reader in "$test_dir/index.html" "$test_dir/part.html" "$test_dir/arc.html" "$test_dir/episode.html" "$test_dir/chapter1.html" "$test_dir/full.html"; do
+# Icons are allowed only inside the reading toolbar, not the contents or headers.
+for reader in "$test_dir/index.html" "$test_dir/part.html" "$test_dir/arc.html" "$test_dir/episode.html"; do
   ! grep -q '<svg' "$reader"
+done
+for reader in "$test_dir/chapter1.html" "$test_dir/full.html"; do
+  grep -q 'id="readerTheme"' "$reader"
+  grep -q 'id="readerFont"' "$reader"
+  grep -q 'id="readerFullscreen"' "$reader"
+  test "$(grep -o '<svg' "$reader" | wc -l)" -eq 6
 done
 grep -q 'Đọc toàn bộ tập' "$test_dir/episode.html"
 grep -q 'episode-read.php?id=1' "$test_dir/episode.html"
@@ -91,4 +98,4 @@ expect_code 404 'arc.php?id=2'
 expect_code 404 'chapter.php?id=0'
 expect_code 404 'chapter.php?id=999999999999999999999'
 expect_code 403 'preview.php'
-echo 'PASS: original Part-to-page navigation, icon-free reader, chapter/full-episode rendering, cross-episode navigation, privacy and HTTP access'
+echo 'PASS: original Part-to-page navigation, toolbar-only icons, fullscreen control, chapter/full-episode rendering, cross-episode navigation, privacy and HTTP access'
