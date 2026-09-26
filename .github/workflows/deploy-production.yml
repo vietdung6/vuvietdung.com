@@ -1,0 +1,121 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+  CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
+  CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+  CPANEL_TARGET_DIR: ${{ secrets.CPANEL_TARGET_DIR }}
+  REMOTE_ARCHIVE: .github-deploy-${{ github.run_id }}-${{ github.run_attempt }}.zip
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate deployment secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in CPANEL_HOST CPANEL_USERNAME CPANEL_TOKEN CPANEL_TARGET_DIR; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing GitHub secret: $name"
+              exit 1
+            fi
+          done
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate PHP syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=$(find . -type f -name '*.php' -not -path './.git/*')
+          if [ -n "$files" ]; then
+            while IFS= read -r file; do
+              php -l "$file"
+            done <<< "$files"
+          fi
+
+      - name: Build deployment archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .deploy/site
+
+          rsync -a ./ .deploy/site/             --exclude '.git/'             --exclude '.github/'             --exclude '.deploy/'             --exclude 'oxytocin/oxytocin.db'             --exclude 'oxytocin/error_log'             --exclude 'oxytocin/test_write.db'
+
+          (
+            cd .deploy/site
+            zip -qr "../${REMOTE_ARCHIVE}" .
+          )
+
+          echo "Archive contents:"
+          unzip -l ".deploy/${REMOTE_ARCHIVE}" | tail -n 20
+
+      - name: Upload archive to cPanel
+        shell: bash
+        run: |
+          set -euo pipefail
+          response=$(curl --fail-with-body --silent --show-error             -H "Authorization: cpanel ${CPANEL_USERNAME}:${CPANEL_TOKEN}"             -F "dir=${CPANEL_TARGET_DIR}"             -F "file-1=@.deploy/${REMOTE_ARCHIVE}"             "https://${CPANEL_HOST}:2083/execute/Fileman/upload_files")
+
+          echo "$response"
+
+          python3 - "$response" <<'PY'
+          import json, sys
+          data = json.loads(sys.argv[1])
+          if data.get("status") != 1:
+              raise SystemExit("cPanel upload failed")
+          PY
+
+      - name: Extract archive into production
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="/home/${CPANEL_USERNAME}/${CPANEL_TARGET_DIR}"
+          ARCHIVE="${TARGET}/${REMOTE_ARCHIVE}"
+
+          response=$(curl --fail-with-body --silent --show-error --get             -H "Authorization: cpanel ${CPANEL_USERNAME}:${CPANEL_TOKEN}"             --data-urlencode "cpanel_jsonapi_user=${CPANEL_USERNAME}"             --data-urlencode "cpanel_jsonapi_apiversion=2"             --data-urlencode "cpanel_jsonapi_module=Fileman"             --data-urlencode "cpanel_jsonapi_func=fileop"             --data-urlencode "op=extract"             --data-urlencode "sourcefiles=${ARCHIVE}"             --data-urlencode "destfiles=${TARGET}"             "https://${CPANEL_HOST}:2083/json-api/cpanel")
+
+          echo "$response"
+
+          python3 - "$response" <<'PY'
+          import json, sys
+          data = json.loads(sys.argv[1])
+          result = data.get("cpanelresult", {})
+          events = result.get("event", {})
+          if isinstance(events, dict) and events.get("result") == 0:
+              raise SystemExit("cPanel extract failed")
+          if result.get("error"):
+              raise SystemExit(result["error"])
+          PY
+
+      - name: Remove temporary archive
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="/home/${CPANEL_USERNAME}/${CPANEL_TARGET_DIR}"
+          ARCHIVE="${TARGET}/${REMOTE_ARCHIVE}"
+
+          curl --silent --show-error --get             -H "Authorization: cpanel ${CPANEL_USERNAME}:${CPANEL_TOKEN}"             --data-urlencode "cpanel_jsonapi_user=${CPANEL_USERNAME}"             --data-urlencode "cpanel_jsonapi_apiversion=2"             --data-urlencode "cpanel_jsonapi_module=Fileman"             --data-urlencode "cpanel_jsonapi_func=fileop"             --data-urlencode "op=unlink"             --data-urlencode "sourcefiles=${ARCHIVE}"             "https://${CPANEL_HOST}:2083/json-api/cpanel" >/dev/null || true
+
+      - name: Smoke test production
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error             --retry 3             --retry-delay 2             --output /dev/null             https://vuvietdung.com/
+          echo "Production is responding."
