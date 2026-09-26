@@ -124,6 +124,30 @@ try {
   await admin.goto(at('admin.php'));
   assert.equal(await admin.locator('#chapterForm').count(), 1, 'Existing admin session unlocks v2');
 
+  // The restored Settings tab edits site metadata and synopsis without publishing a chapter.
+  await admin.goto(at('admin.php?tab=settings'));
+  assert(await admin.getByRole('link', { name: /Cài đặt trang/ }).isVisible(),
+    'Settings tab is visible in the navigation');
+  assert.equal(await admin.locator('#siteSettingsForm').count(), 1,
+    'Settings form is available even before any new content');
+  await admin.locator('#siteSettingsForm input[name="site_genre"]').fill('PSYCHOLOGICAL NOIR');
+  await admin.locator('#siteSettingsForm textarea[name="synopsis"]')
+    .fill('SITE_SYNOPSIS_VISIBLE\\n\\n**Nhấn mạnh** và *màu đỏ*');
+  await admin.getByRole('button', { name: 'Lưu cài đặt' }).click();
+  await admin.waitForURL(/tab=settings/);
+  assert((await admin.locator('#siteSettingsForm textarea[name="synopsis"]').inputValue())
+    .includes('SITE_SYNOPSIS_VISIBLE'));
+  await page.goto(at('index.php'));
+  assert((await page.locator('.synopsis').innerText()).includes('SITE_SYNOPSIS_VISIBLE'),
+    'Saved synopsis appears on v2 homepage');
+  assert((await page.locator('.meta').innerText()).includes('PSYCHOLOGICAL NOIR'),
+    'Saved website metadata appears on homepage');
+  assert.equal(await page.locator('.synopsis .highlight-bright').count(), 1);
+  assert.equal(await page.locator('.synopsis .highlight-red').count(), 1);
+  await admin.goto(at('admin.php?tab=chapters'));
+  assert.equal(await admin.locator('#chapterForm').count(), 1,
+    'Switching back to Chapter editor retains existing CRUD');
+
   // Device-local automatic recovery must not publish.
   const editor = admin.locator('#chapterEditor');
   await editor.fill('RECOVER_ME_LOCAL');
