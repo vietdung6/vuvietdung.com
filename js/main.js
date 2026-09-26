@@ -46,6 +46,17 @@ updateCameraFov();
 layoutCockpit();
 layoutDiveTargets();
 
+/* ONE VESSEL MODEL
+   The former cockpit scene is now the physical interior module of ship.
+   Its local transform aligns the original interior coordinates with the
+   exterior canopy. Both camera modes therefore observe the same vessel. */
+ship.add(cockpit);
+cockpit.position.set(0, 1.785, 0.415);
+cockpit.scale.set(0.93, 0.90, 0.85);
+cockpit.rotation.set(0, 0, 0);
+ship.visible = true;
+cockpit.visible = true;
+
 camPos.set(0, 0, 0);
 camLook.set(0, 0, -100);
 camera.position.copy(camPos);
@@ -71,10 +82,10 @@ function animate() {
   /* --- 2. Camera (không có shake) --- */
   updateCamera(dt);
 
-  /* --- 3. Ship visibility --- */
-  const showShip = state.viewBlend > 0.45;
-  ship.visible = showShip;
-  cockpit.visible = !showShip;
+  /* --- 3. One vessel, two camera positions ---
+     Never swap between an exterior ship and a fake cockpit again. */
+  ship.visible = true;
+  cockpit.visible = true;
 
   /* --- 4. Warp: baseline + dive --- */
   const targetWarp = state.warpAmount + getWarpContribution();
