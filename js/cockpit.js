@@ -126,20 +126,82 @@ const sillGlow = new THREE.Mesh(
 sillGlow.position.z += 0.05;
 canopyGroup.add(sillGlow);
 
+/* --- WINDSHIELD GLASS: actual panes, not only the frame --- */
+const centerWindshield = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.18, 1.38),
+  cockpitGlassMat
+);
+centerWindshield.position.set(0, CY, CZ + 0.18);
+canopyGroup.add(centerWindshield);
+
+const leftWindshield = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.18, 1.38),
+  cockpitGlassMat
+);
+leftWindshield.position.set(-2.15, CY, CZ + 0.43);
+leftWindshield.rotation.y = Math.PI / 8;
+canopyGroup.add(leftWindshield);
+
+const rightWindshield = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.18, 1.38),
+  cockpitGlassMat
+);
+rightWindshield.position.set(2.15, CY, CZ + 0.43);
+rightWindshield.rotation.y = -Math.PI / 8;
+canopyGroup.add(rightWindshield);
+
+/* subtle top glass strip closes the visual gap above the windshield */
+const topGlass = new THREE.Mesh(
+  new THREE.PlaneGeometry(5.6, 1.1),
+  cockpitGlassMat
+);
+topGlass.rotation.x = -Math.PI / 2;
+topGlass.position.set(0, CY + 1.32, CZ + 1.25);
+canopyGroup.add(topGlass);
+
 /* ============================================================
    INTERIOR ENCLOSURE — Tường / Trần / Sàn
    ============================================================ */
 
-/* --- 2 SIDE WALLS --- */
+/* --- SIDE WALLS + SIDE WINDOWS --- */
+const cockpitGlassMat = new THREE.MeshStandardMaterial({
+  color: 0x9cefff,
+  emissive: 0x102f3a,
+  emissiveIntensity: 0.52,
+  roughness: 0.18,
+  metalness: 0.06,
+  transparent: true,
+  opacity: 0.22,
+  side: THREE.DoubleSide,
+  depthWrite: false
+});
+
 [-1, 1].forEach(side => {
-  const wall = new THREE.Mesh(
-    new THREE.BoxGeometry(0.20, 4.7, 8.0),
+  /* solid lower pressure wall */
+  const lowerWall = new THREE.Mesh(
+    new THREE.BoxGeometry(0.20, 2.30, 8.0),
     MAT_PANEL
   );
-  wall.position.set(side * 3.5, -0.15, -5.9);
-  cockpit.add(wall);
+  lowerWall.position.set(side * 3.5, -1.32, -5.9);
+  cockpit.add(lowerWall);
 
-  /* Wall upper edge glow (nối vào ceiling) */
+  /* narrow structural rail above the window */
+  const upperRail = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.30, 8.0),
+    MAT_PANEL
+  );
+  upperRail.position.set(side * 3.5, 2.02, -5.9);
+  cockpit.add(upperRail);
+
+  /* transparent side canopy, visible from inside */
+  const sideWindow = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.9, 1.95),
+    cockpitGlassMat
+  );
+  sideWindow.position.set(side * 3.38, 0.80, -5.95);
+  sideWindow.rotation.y = side * Math.PI / 2;
+  cockpit.add(sideWindow);
+
   const wallEdgeTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.22, 0.04, 8.0),
     MAT_EDGE_CYAN
@@ -147,7 +209,13 @@ canopyGroup.add(sillGlow);
   wallEdgeTop.position.set(side * 3.5, 2.18, -5.9);
   cockpit.add(wallEdgeTop);
 
-  /* Wall bottom edge (nối vào floor) */
+  const windowSill = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.08, 7.7),
+    MAT_EDGE_AMBER
+  );
+  windowSill.position.set(side * 3.5, -0.18, -5.9);
+  cockpit.add(windowSill);
+
   const wallEdgeBot = new THREE.Mesh(
     new THREE.BoxGeometry(0.22, 0.04, 8.0),
     MAT_EDGE_AMBER
