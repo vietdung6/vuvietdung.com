@@ -67,11 +67,15 @@ function v2_clean_node(DOMNode $node, DOMDocument $doc): ?DOMNode {
         }
     }
     if ($tag === 'span' || $tag === 'strong') {
+        // Native contenteditable may emit <font color> for foreColor.
+        $fontColor = strtolower(trim($node->getAttribute('color')));
         $color = '';
         if (preg_match('/(?:^|\s)highlight-red(?:\s|$)/', $class)
+            || $fontColor === '#e53935' || $fontColor === 'rgb(229,57,53)'
             || str_contains($style,'color:#e53935') || str_contains($style,'color:rgb(229,57,53)')) {
             $color = 'highlight-red';
         } elseif (preg_match('/(?:^|\s)highlight-bright(?:\s|$)/', $class)
+            || $fontColor === '#f5f2eb' || $fontColor === 'rgb(245,242,235)'
             || str_contains($style,'color:#f5f2eb') || str_contains($style,'color:rgb(245,242,235)')) {
             $color = 'highlight-bright';
         }
