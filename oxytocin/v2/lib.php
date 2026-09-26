@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/render.php';
 
 /**
  * OXYTOCIN v2: isolated database and explicit CRUD operations.
@@ -146,14 +147,21 @@ function v2_save(PDO $db, string $type, array $p): int {
         $title = v2_text($p, 'title');
         // Do not trim story content: whitespace is part of the author's manuscript.
         $body = (string) ($p['content'] ?? '');
+        $format = $p['content_format'] ?? 'html';
+        $intent = (string) ($p['action'] ?? 'save');
+        if (!in_array($format, ['noir_text','html'], true) || !in_array($intent, ['save','save_publish','update_published'], true)) {
+            throw new DomainException('Định dạng hoặc thao tác nội dung không hợp lệ.');
+        }
         if (strlen($body) > 2_000_000) {
             throw new DomainException('Chương vượt giới hạn 2 MB.');
         }
-        $fields = ['episode_id' => $episode, 'title' => $title, 'content' => $body];
-        $format = $p['content_format'] ?? 'noir_text';
-        if (!in_array($format, ['noir_text','html'], true)) {
-            throw new DomainException('Định dạng nội dung không hợp lệ.');
+        // Treat HTML coming from any client as hostile; editor-side cleanup is not a security boundary.
+        if ($format === 'html') $body = v2_sanitize_html($body);
+        if (strlen($body) > 2_000_000) throw new DomainException('Chương vượt giới hạn 2 MB.');
+        if ($intent === 'save_publish' && !v2_text_visible($body, $format)) {
+            throw new DomainException('Không thể đăng chương trống.');
         }
+        $fields = ['episode_id' => $episode, 'title' => $title, 'content' => $body];
     } else {
         throw new DomainException('Loại dữ liệu không hợp lệ.');
     }
@@ -192,13 +200,13 @@ function v2_save(PDO $db, string $type, array $p): int {
                 throw new DomainException('Không tìm thấy chương.');
             }
             $revision = v2_num($p['revision'] ?? '', 1);
-            if ($row['status'] === 'published' && ($p['action'] ?? 'save') !== 'update_published') {
+            if ($row['status'] === 'published' && $intent !== 'update_published') {
                 throw new DomainException('Chương đã đăng: phải chọn Cập nhật chương đã đăng.');
             }
-            if ($row['status'] === 'draft' && ($p['action'] ?? 'save') !== 'save') {
-                throw new DomainException('Chỉ được cập nhật nội dung đã đăng khi chương đang xuất bản.');
+            if ($row['status'] === 'draft' && !in_array($intent, ['save','save_publish'], true)) {
+                throw new DomainException('Chương nháp chỉ có thể được lưu hoặc đăng.');
             }
-            if ($row['status'] === 'published' && trim($body) === '') {
+            if ($row['status'] === 'published' && !v2_text_visible($body, $format)) {
                 throw new DomainException('Không được làm rỗng chương đã đăng.');
             }
             $position = (int) $row['sort_order'];
@@ -213,6 +221,13 @@ function v2_save(PDO $db, string $type, array $p): int {
             if ($stmt->rowCount() !== 1) {
                 throw new DomainException('Chương đã được chỉnh sửa ở nơi khác. Hãy tải lại trước khi lưu.');
             }
+        }
+        if ($intent === 'save_publish') {
+            // Save + publish in the SAME transaction. A failed publish leaves no half-saved draft.
+            $stmt = $db->prepare("UPDATE chapters SET status='published', published_at=datetime('now'),
+                updated_at=datetime('now'), revision=revision+1 WHERE id=? AND status='draft'");
+            $stmt->execute([$id]);
+            if ($stmt->rowCount() !== 1) throw new DomainException('Chương không ở trạng thái nháp.');
         }
         $db->commit();
     } catch (Throwable $e) {
@@ -235,7 +250,7 @@ function v2_publication(PDO $db, int $id, int $revision, string $action): void {
             throw new DomainException('Chương không tồn tại hoặc đã được chỉnh sửa. Hãy tải lại.');
         }
         if ($action === 'publish') {
-            if ($chapter['status'] !== 'draft' || trim($chapter['content']) === '') {
+            if ($chapter['status'] !== 'draft' || !v2_text_visible((string)$chapter['content'], (string)$chapter['content_format'])) {
                 throw new DomainException('Chỉ được đăng chương nháp có nội dung.');
             }
             $stmt = $db->prepare("UPDATE chapters SET status='published', published_at=datetime('now'),
