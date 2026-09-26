@@ -1,0 +1,25 @@
+# vuvietdung.com — development-friendly cache policy
+# Always re-fetch site code so GitHub -> cPanel deployments are visible immediately.
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(?:html?|css|js|mjs)$">
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header always set Pragma "no-cache"
+    Header always set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 0 seconds"
+  ExpiresByType application/javascript "access plus 0 seconds"
+  ExpiresByType text/javascript "access plus 0 seconds"
+</IfModule>
+
+# Prevent intermediaries from serving stale HTML.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(?:html?)$">
+    Header always set CDN-Cache-Control "no-store"
+  </FilesMatch>
+</IfModule>
