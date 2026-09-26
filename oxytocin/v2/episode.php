@@ -19,7 +19,7 @@ v2_reader_breadcrumb([
         <span class="ep-label-number">Tập <?= $episode['num'] ?></span></div>
     <h1 class="ep-title-en"><?= v2_h($episode['en'] ?: $episode['vi'] ?: 'Tập ' . $episode['num']) ?></h1>
     <?php if ($episode['en'] && $episode['vi']): ?><div class="ep-title-vi"><?= v2_h($episode['vi']) ?></div><?php endif; ?>
-    <div class="page-divider ep-divider"><span></span>✦<span></span></div>
+    <div class="v2-rule" aria-hidden="true"></div>
     <?php if ($episode['intro']): ?><p class="ep-intro"><?= nl2br(v2_h($episode['intro'])) ?></p><?php endif; ?>
 </header>
 <section class="v2-toc v2-episode-chapters" aria-labelledby="episode-chapter-title">
@@ -29,11 +29,11 @@ v2_reader_breadcrumb([
         <li><a href="chapter.php?id=<?= $chapter['id'] ?>">
             <span class="outline-marker">Chương <?= $chapter['number'] ?></span>
             <?php if ($chapter['title']): ?><strong><?= v2_h($chapter['title']) ?></strong><?php endif; ?>
-            <span aria-hidden="true">↗</span>
+            
         </a></li>
     <?php endforeach; ?>
     </ol>
-    <a class="reader-primary" href="episode-read.php?id=<?= $episode['id'] ?>">Đọc toàn bộ tập →</a>
+    <a class="reader-primary" href="episode-read.php?id=<?= $episode['id'] ?>">Đọc toàn bộ tập</a>
     <p class="reader-hint">Đọc liền các chương đã đăng, không có bản nội dung riêng.</p>
 </section>
 <?php v2_reader_close(); ?>
