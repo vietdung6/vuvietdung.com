@@ -1,0 +1,30 @@
+name: Validate OXYTOCIN v2
+on:
+  pull_request:
+    paths:
+      - 'oxytocin/v2/**'
+      - 'tests/oxytocin-v2.php'
+      - '.github/workflows/oxytocin-v2-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l oxytocin/v2/lib.php
+          php -l oxytocin/v2/init.php
+          php -l oxytocin/v2/admin.php
+          php -l tests/oxytocin-v2.php
+      - name: SQLite CRUD and isolation tests
+        run: php tests/oxytocin-v2.php
