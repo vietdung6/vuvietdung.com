@@ -8,12 +8,7 @@ header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 header("Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 ini_set('session.use_strict_mode', '1');
-session_name('oxy_v2_admin');
-session_set_cookie_params([
-    'lifetime' => 0, 'path' => '/oxytocin/v2/', 'httponly' => true,
-    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-    'samesite' => 'Strict'
-]);
+// Reuse the PHPSESSID set by oxytocin/admin.php. No second password or host setup.
 session_start();
 
 function v2_token(): string {
@@ -73,11 +68,6 @@ function v2_commands(string $type, array $row): void {
     echo '<a class="danger" href="?tab=' . $type . '&confirm_delete=' . $id . '">Xóa</a></div>';
 }
 
-$hash = getenv('OXYTOCIN_V2_ADMIN_PASSWORD_HASH');
-if (!is_string($hash) || password_get_info($hash)['algoName'] === 'unknown') {
-    http_response_code(503);
-    exit('Trang quản trị v2 chưa được cấu hình. Hãy thiết lập biến môi trường cho mật khẩu băm.');
-}
 try {
     $db = v2_db();
 } catch (Throwable $e) {
@@ -89,7 +79,7 @@ try {
 $validTabs = ['parts','arcs','episodes','chapters'];
 $tab = (string)($_GET['tab'] ?? 'chapters');
 if (!in_array($tab, $validTabs, true)) $tab = 'chapters';
-$authenticated = !empty($_SESSION['v2_authenticated']);
+$authenticated = !empty($_SESSION['admin']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrf = (string)($_POST['csrf'] ?? '');
     if (!hash_equals(v2_token(), $csrf)) {
@@ -97,31 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Biểu mẫu đã hết hạn. Tải lại trang và thử lại.');
     }
     $action = (string) ($_POST['action'] ?? '');
-    if ($action === 'login') {
-        $until = (int)($_SESSION['lock_until'] ?? 0);
-        $valid = time() >= $until && password_verify((string)($_POST['password'] ?? ''), $hash);
-        if ($valid) {
-            session_regenerate_id(true);
-            $_SESSION['v2_authenticated'] = true;
-            $_SESSION['attempts'] = 0;
-            $_SESSION['lock_until'] = 0;
-            $_SESSION['csrf'] = bin2hex(random_bytes(32));
-            v2_redirect();
-        }
-        $_SESSION['attempts'] = (int)($_SESSION['attempts'] ?? 0) + 1;
-        if ($_SESSION['attempts'] >= 5) {
-            $_SESSION['lock_until'] = time() + 120;
-            $_SESSION['attempts'] = 0;
-        }
-        v2_flash('Mật khẩu không đúng hoặc đăng nhập đang bị tạm khóa.', 'error');
-        v2_redirect();
-    }
     if (!$authenticated) {
         http_response_code(403);
         exit('Cần đăng nhập.');
     }
     if ($action === 'logout') {
-        $_SESSION = [];
+        // Log out of both admins; do not erase unrelated PHP session state.
+        unset($_SESSION['admin']);
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
         session_regenerate_id(true);
         v2_redirect();
     }
@@ -189,12 +162,10 @@ unset($_SESSION['flash']);
 <?php if (!$authenticated): ?>
 <main class="login card">
     <h1>OXYTOCIN / Quản trị v2</h1>
-    <p>Hệ thống riêng, không truy cập database truyện cũ.</p>
+    <p>Đăng nhập ở admin hiện tại trước, rồi quay lại đây. Không cần mật khẩu v2 riêng.</p>
     <?php if ($flash): ?><p class="notice <?= v2_h($flash['kind']) ?>"><?= v2_h($flash['text']) ?></p><?php endif; ?>
-    <form method="post"><?php v2_hidden('', 'login'); ?>
-        <label class="field">Mật khẩu quản trị<input type="password" name="password" autocomplete="current-password" required autofocus></label>
-        <button class="primary" type="submit">Đăng nhập</button>
-    </form>
+    <p><a class="primary" href="../admin.php">Đăng nhập admin OXYTOCIN ↗</a></p>
+    <p><a href="admin.php">Đã đăng nhập? Mở quản trị v2 →</a></p>
 </main>
 <?php else:
     $parts = v2_rows($db, 'parts');
