@@ -29,6 +29,7 @@ php tests/oxytocin-v2-reader-fixture.php >/dev/null
 curl -fsS "$base/index.php" >"$test_dir/index.html"
 
 curl -fsS "$base/part.php?id=1" >"$test_dir/part.html"
+curl -fsS "$base/part.php?id=3" >"$test_dir/empty-part.html"
 curl -fsS "$base/arc.php?id=1" >"$test_dir/arc.html"
 curl -fsS "$base/episode.php?id=1" >"$test_dir/episode.html"
 curl -fsS "$base/chapter.php?id=1" >"$test_dir/chapter1.html"
@@ -37,6 +38,10 @@ curl -fsS "$base/episode-read.php?id=1" >"$test_dir/full.html"
 curl -fsS "$base/chapter.php?id=4" >"$test_dir/chapter4.html"
 
 grep -q 'class="arc-card v2-part-card" href="part.php?id=1"' "$test_dir/index.html"
+grep -q 'class="arc-card v2-part-card" href="part.php?id=3"' "$test_dir/index.html"
+grep -q 'UPCOMING_EMPTY_PART' "$test_dir/index.html"
+! grep -q 'Hidden' "$test_dir/index.html"
+grep -q 'Phần này chưa có chương được đăng.' "$test_dir/empty-part.html"
 grep -q 'id="toc-title">Mục lục</h2>' "$test_dir/index.html"
 ! grep -q '<details' "$test_dir/index.html"
 ! grep -q 'Trang riêng của phần' "$test_dir/index.html"
@@ -102,4 +107,4 @@ expect_code 404 'arc.php?id=2'
 expect_code 404 'chapter.php?id=0'
 expect_code 404 'chapter.php?id=999999999999999999999'
 expect_code 403 'preview.php'
-echo 'PASS: original Part-to-page navigation, toolbar-only icons, fullscreen control, chapter/full-episode rendering, cross-episode navigation, privacy and HTTP access'
+echo 'PASS: active empty Part visible in homepage and accessible without exposing hidden Parts, plus chapter/full-episode privacy and navigation'
