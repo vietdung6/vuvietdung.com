@@ -73,7 +73,7 @@ try {
   assert((await page.locator('.v2-library-title').evaluate(node =>
     getComputedStyle(node).fontFamily)).includes('Cormorant Garamond'),
     'Vietnamese section heading uses original novel typography');
-  assert((await page.locator('.v2-part-card .arc-card-title').evaluate(node =>
+  assert((await page.locator('.v2-part-card .arc-card-title').first().evaluate(node =>
     getComputedStyle(node).fontFamily)).includes('Cinzel'),
     'Original cover-title typography is restored');
   assert.equal(await page.locator('svg').count(), 0,
