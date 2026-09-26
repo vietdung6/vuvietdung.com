@@ -6,7 +6,7 @@ header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
-header("Content-Security-Policy: default-src 'none'; style-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+header("Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 ini_set('session.use_strict_mode', '1');
 session_name('oxy_v2_admin');
 session_set_cookie_params([
@@ -20,8 +20,9 @@ function v2_token(): string {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
     return $_SESSION['csrf'];
 }
-function v2_redirect(string $tab = 'chapters', int $edit = 0): never {
-    header('Location: admin.php?tab=' . rawurlencode($tab) . ($edit > 0 ? '&edit=' . $edit : ''), true, 303);
+function v2_redirect(string $tab = 'chapters', int $edit = 0, bool $saved = false): never {
+    header('Location: admin.php?tab=' . rawurlencode($tab)
+        . ($edit > 0 ? '&edit=' . $edit : '') . ($saved ? '&saved=1' : ''), true, 303);
     exit;
 }
 function v2_flash(string $text, string $kind = 'ok'): void {
@@ -130,14 +131,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('Loại dữ liệu không hợp lệ.');
     }
     $id = v2_num($_POST['id'] ?? '0');
-    $edit = 0;
+    $edit = $type === 'chapters' ? $id : 0;
+    $saved = false;
     try {
-        if (in_array($action, ['save','update_published'], true)) {
-            if ($action === 'update_published' && $type !== 'chapters') {
+        if ($type === 'chapters' && isset($_POST['chapter_intent'])) {
+            $action = (string) $_POST['chapter_intent'];
+            if (!in_array($action, ['save','save_publish','update_published'], true)) {
+                throw new DomainException('Thao tác chương không hợp lệ.');
+            }
+        }
+        if (in_array($action, ['save','save_publish','update_published'], true)) {
+            if ($type !== 'chapters' && $action !== 'save') {
                 throw new DomainException('Thao tác không hợp lệ.');
             }
-            $edit = v2_save($db, $type, $_POST);
-            v2_flash('Đã lưu dữ liệu. Chương mới luôn là bản nháp.');
+            $payload = $_POST;
+            $payload['action'] = $action;
+            $edit = v2_save($db, $type, $payload);
+            $saved = $type === 'chapters';
+            v2_flash(match ($action) {
+                'save_publish' => 'Đã lưu và đăng chương.',
+                'update_published' => 'Đã cập nhật chương đã đăng.',
+                default => $type === 'chapters' ? 'Đã lưu nháp. Chưa đăng.' : 'Đã lưu thông tin.'
+            });
         } elseif ($action === 'publish' || $action === 'unpublish') {
             if ($type !== 'chapters') throw new DomainException('Thao tác xuất bản không hợp lệ.');
             v2_publication($db, $id, v2_num($_POST['revision'] ?? '', 1), $action);
@@ -162,14 +177,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log('OXYTOCIN v2 error: ' . get_class($e));
         v2_flash('Thao tác không thành công. Kiểm tra lại dữ liệu.', 'error');
     }
-    v2_redirect($type, $edit);
+    v2_redirect($type, $edit, $saved);
 }
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 ?>
 <!doctype html><html lang="vi"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quản trị OXYTOCIN v2</title><link rel="stylesheet" href="admin.css">
+<title>Quản trị OXYTOCIN v2</title><link rel="stylesheet" href="admin.css"><link rel="stylesheet" href="editor.css"><script src="editor.js" defer></script>
 </head><body>
 <?php if (!$authenticated): ?>
 <main class="login card">
@@ -223,7 +238,7 @@ unset($_SESSION['flash']);
         <?php if (($tab==='arcs' && !$parts) || ($tab==='episodes' && !$arcs) || ($tab==='chapters' && !$episodes)): ?>
             <p>Hãy tạo <?= $tab==='arcs'?'Phần':($tab==='episodes'?'Arc':'Tập') ?> trước khi tạo mục này.</p>
         <?php else: ?>
-        <form method="post"><?php v2_hidden($tab, $tab==='chapters' && $edit && $edit['status']==='published' ? 'update_published' : 'save', (int)($edit['id'] ?? 0)); ?>
+        <form method="post" <?= $tab==='chapters' ? 'id="chapterForm"' : '' ?>><?php v2_hidden($tab, $tab==='chapters' && $edit && $edit['status']==='published' ? 'update_published' : 'save', (int)($edit['id'] ?? 0)); ?>
             <?php if ($tab === 'parts'):
                 v2_field('part_num','Số phần (0 = Prologue)', $edit['part_num'] ?? (count($parts)?max(array_column($parts,'part_num'))+1:0),'number',true);
                 v2_field('badge','Nhãn phần', $edit['badge'] ?? '');
@@ -248,16 +263,58 @@ unset($_SESSION['flash']);
             else:
                 v2_select('episode_id','Thuộc tập',$episodeOptions,$edit['episode_id'] ?? array_key_first($episodeOptions));
                 v2_field('title','Tên chương (không bắt buộc)',$edit['title'] ?? '');
-                v2_field('content','Nội dung chương',$edit['content'] ?? '','textarea');
+                $format = $edit['content_format'] ?? 'html';
+                $body = (string)($edit['content'] ?? '');
+                echo '<input type="hidden" name="content_format" value="' . v2_h($format) . '">';
                 if ($edit) {
                     echo '<input type="hidden" name="revision" value="' . (int)$edit['revision'] . '">';
-                    echo '<input type="hidden" name="content_format" value="' . v2_h($edit['content_format']) . '">';
-                } else {
-                    echo '<input type="hidden" name="content_format" value="noir_text">';
                 }
-                echo '<p class="hint">Bước 3 chỉ có ô văn bản cơ bản. Bước 4 sẽ bổ sung trình soạn thảo trực quan. Dấu --- / ✦ chỉ là dấu ngắt cảnh.</p>';
+                echo '<p id="recoveryBanner" class="recovery" hidden>Bản khôi phục trên thiết bị chưa được lưu lên máy chủ. '
+                    . '<button type="button" id="recoverDraft">Khôi phục</button>'
+                    . '<button type="button" id="discardDraft">Bỏ bản khôi phục</button></p>';
+                if ($format === 'html') {
+                    echo '<label class="field" for="chapterEditor">Nội dung chương</label>';
+                    echo '<div id="editorShell" class="editor-shell">'
+                        . '<div id="editorToolbar" class="editor-toolbar" role="toolbar" aria-label="Định dạng văn bản">'
+                        . '<button type="button" data-command="bold" title="In đậm (Ctrl+B)"><strong>B</strong></button>'
+                        . '<button type="button" data-command="italic" title="In nghiêng (Ctrl+I)"><em>I</em></button>'
+                        . '<button type="button" data-command="underline" title="Gạch dưới (Ctrl+U)"><u>U</u></button>'
+                        . '<span class="toolbar-divider"></span>'
+                        . '<button type="button" data-command="red" class="is-red" title="Nhấn mạnh đỏ">Đỏ</button>'
+                        . '<button type="button" data-command="bright" title="Nhấn mạnh sáng">Sáng</button>'
+                        . '<button type="button" data-command="center-red" class="is-red" title="Căn giữa, chữ đỏ">Câu đỏ</button>'
+                        . '<button type="button" data-command="beat" class="is-gold" title="Căn giữa, chữ vàng">Nhịp vàng</button>'
+                        . '<button type="button" data-command="scene" title="Ngắt cảnh trong chương">✦ ✦ ✦</button>'
+                        . '<span class="toolbar-divider"></span>'
+                        . '<button type="button" data-command="undo" title="Hoàn tác">↶</button>'
+                        . '<button type="button" data-command="redo" title="Làm lại">↷</button>'
+                        . '<button type="button" data-command="fullscreen" aria-pressed="false" title="Toàn màn hình">⛶</button>'
+                        . '</div>'
+                        . '<div id="chapterEditor" class="editor-area" contenteditable="true" role="textbox"'
+                        . ' aria-label="Nội dung chương" aria-multiline="true" spellcheck="true">'
+                        . v2_sanitize_html($body) . '</div></div>';
+                    echo '<textarea class="editor-fallback field" id="chapterContent" name="content" rows="17">'
+                        . v2_h($body) . '</textarea>';
+                } else {
+                    v2_field('content','Nội dung chương (định dạng Noir cũ)',$body,'textarea');
+                    echo '<p class="hint">Giữ nguyên cú pháp cũ: **chữ sáng**, *chữ đỏ*; không tự chuyển đổi nội dung.</p>';
+                }
+                echo '<p id="autosaveStatus" class="autosave-status" role="status">Bản khôi phục chỉ nằm trên thiết bị; chưa đăng.</p>';
+                echo '<p class="hint">Dấu --- hoặc ✦ ✦ ✦ chỉ ngắt cảnh. Dán từ Word/Google Docs sẽ loại bỏ định dạng không cần thiết.</p>';
             endif; ?>
-            <div class="form-actions"><button class="primary" type="submit"><?= $tab==='chapters' ? ($edit && $edit['status']==='published' ? 'Cập nhật chương đã đăng' : 'Lưu nháp') : 'Lưu thông tin' ?></button>
+            <div class="form-actions">
+                <?php if ($tab === 'chapters'): ?>
+                    <?php if ($edit && $edit['status'] === 'published'): ?>
+                        <button class="primary" type="submit" name="chapter_intent" value="update_published">Cập nhật chương đã đăng</button>
+                    <?php else: ?>
+                        <button class="primary" type="submit" name="chapter_intent" value="save">Lưu nháp</button>
+                        <button type="submit" name="chapter_intent" value="save_publish">Đăng chương</button>
+                    <?php endif; ?>
+                    <button type="submit" name="chapter_intent" value="preview"
+                        formaction="preview.php" formtarget="_blank">Xem trước ↗</button>
+                <?php else: ?>
+                    <button class="primary" type="submit">Lưu thông tin</button>
+                <?php endif; ?>
                 <?php if ($edit): ?><a href="?tab=<?= $tab ?>">Hủy sửa</a><?php endif; ?>
             </div>
         </form>
