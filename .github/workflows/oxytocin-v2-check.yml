@@ -9,6 +9,11 @@ on:
       - 'tests/oxytocin-v2-reader.php'
       - 'tests/oxytocin-v2-reader-fixture.php'
       - 'tests/oxytocin-v2-reader-http.sh'
+      - 'tests/oxytocin-v2-browser.mjs'
+      - 'tests/oxytocin-v2-backup.sh'
+      - 'tests/oxytocin-v2-archive.sh'
+      - '.github/workflows/deploy-production.yml'
+      - 'oxytocin/.htaccess'
       - '.github/workflows/oxytocin-v2-check.yml'
   workflow_dispatch:
 
@@ -29,6 +34,7 @@ jobs:
         run: |
           php -l oxytocin/v2/lib.php
           php -l oxytocin/v2/init.php
+          php -l oxytocin/v2/backup-legacy.php
           php -l oxytocin/v2/admin.php
           php -l oxytocin/v2/render.php
           php -l oxytocin/v2/preview.php
@@ -54,7 +60,33 @@ jobs:
         run: php tests/oxytocin-v2-reader.php
       - name: Public HTTP smoke tests
         run: bash tests/oxytocin-v2-reader-http.sh
+      - name: Legacy SQLite backup safety
+        run: bash tests/oxytocin-v2-backup.sh
+      - name: Check cPanel archive privacy and legacy paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage="$(mktemp -d)"
+          trap 'rm -rf "$stage"' EXIT
+          rsync -a ./ "$stage" \
+            --exclude '.git/' --exclude '.github/' --exclude '.deploy/' --exclude '.preview/' \
+            --exclude 'node_modules/' --exclude 'tests/' --exclude 'scripts/' \
+            --exclude 'package.json' --exclude 'package-lock.json' --exclude 'README.md' \
+            --exclude '.gitignore' --exclude 'oxytocin/oxytocin.db' \
+            --exclude 'oxytocin/*.db' --exclude 'oxytocin/*.db-*' --exclude 'oxytocin/*.sqlite*' \
+            --exclude 'oxytocin/v2/*.db' --exclude 'oxytocin/v2/*.db-*' \
+            --exclude 'oxytocin/v2/*.sqlite*' --exclude 'oxytocin/.env*' \
+            --exclude 'oxytocin/v2/.env*' --exclude 'oxytocin/error_log' \
+            --exclude 'oxytocin/test_write.db'
+          bash tests/oxytocin-v2-archive.sh "$stage"
       - name: JavaScript syntax
         run: |
           node --check oxytocin/v2/editor.js
           node --check oxytocin/v2/reader.js
+          node --check tests/oxytocin-v2-browser.mjs
+      - name: Set up Chromium browser test dependencies
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Real desktop/mobile browser integration
+        run: node tests/oxytocin-v2-browser.mjs
