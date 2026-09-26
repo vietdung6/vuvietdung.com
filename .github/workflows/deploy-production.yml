@@ -58,11 +58,40 @@ jobs:
 
           rsync -a ./ .deploy/site/             --exclude '.git/'             --exclude '.github/'             --exclude '.deploy/'             --exclude 'oxytocin/oxytocin.db'             --exclude 'oxytocin/error_log'             --exclude 'oxytocin/test_write.db'
 
+          VERSION="${GITHUB_SHA}"
+
+          # Cache-bust entry CSS/JS references in HTML/PHP.
+          python3 - "${VERSION}" <<'PY'
+          import pathlib, re, sys
+          version = sys.argv[1]
+          root = pathlib.Path(".deploy/site")
+
+          for path in list(root.rglob("*.html")) + list(root.rglob("*.php")):
+              text = path.read_text(encoding="utf-8")
+              text = re.sub(
+                  r'((?:src|href)=["\'])(?!https?:|//|data:|#)([^"\']+?\.(?:js|css))(?:\?[^"\']*)?(["\'])',
+                  lambda m: f"{m.group(1)}{m.group(2)}?v={version}{m.group(3)}",
+                  text
+              )
+              path.write_text(text, encoding="utf-8")
+
+          # Cache-bust every local ES-module edge, not just main.js.
+          for path in root.rglob("*.js"):
+              text = path.read_text(encoding="utf-8")
+              text = re.sub(
+                  r'((?:from\s+|import\s*)["\'])(\.{1,2}/[^"\']+?\.js)(?:\?[^"\']*)?(["\'])',
+                  lambda m: f"{m.group(1)}{m.group(2)}?v={version}{m.group(3)}",
+                  text
+              )
+              path.write_text(text, encoding="utf-8")
+          PY
+
           (
             cd .deploy/site
             zip -qr "../${REMOTE_ARCHIVE}" .
           )
 
+          echo "Deployment asset version: ${VERSION}"
           echo "Archive contents:"
           unzip -l ".deploy/${REMOTE_ARCHIVE}" | tail -n 20
 
