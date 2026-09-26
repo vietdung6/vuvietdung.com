@@ -18,7 +18,8 @@ fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'Chương đ�
 fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'CHAPTER_DRAFT_TITLE',
     'content'=>'SECRET_DRAFT_SHOULD_NOT_LEAK','content_format'=>'noir_text','action'=>'save']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$e0,'title'=>'Chương hai',
-    'content'=>'<p>PUBLIC_TWO_UNIQUE</p>','content_format'=>'html','action'=>'save_publish']);
+    'content'=>'<p>PUBLIC_TWO_UNIQUE</p>' . str_repeat('<p>Đoạn văn thứ hai để thử lưu vị trí đọc.</p>', 65),
+    'content_format'=>'html','action'=>'save_publish']);
 $e1=fixture_insert($db,'episodes',['arc_id'=>(string)$a0,'ep_num'=>'1',
     'title_en'=>'Next','title_vi'=>'Tập tiếp','summary'=>'','intro'=>'']);
 fixture_insert($db,'chapters',['episode_id'=>(string)$e1,'title'=>'Chương ba',
