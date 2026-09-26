@@ -229,6 +229,50 @@ const accentCyanMat = new THREE.MeshBasicMaterial({ color: 0x5ff2ff });
   });
 
   /* ============================================================
+     ROOF + REAR BULKHEAD — close the raised cockpit into one sealed module
+     ============================================================ */
+  const canopyRoof = new THREE.Mesh(
+    new THREE.BoxGeometry(6.55, 0.34, 3.75),
+    hullMat
+  );
+  canopyRoof.position.set(0, CY + 1.02, CZ + 1.72);
+  ship.add(canopyRoof);
+
+  /* dark inset keeps the roof from reading like one flat slab */
+  const roofInset = new THREE.Mesh(
+    new THREE.BoxGeometry(4.9, 0.06, 2.9),
+    hullDarkMat
+  );
+  roofInset.position.set(0, CY + 1.205, CZ + 1.78);
+  ship.add(roofInset);
+
+  /* rear pressure bulkhead closes the canopy against the mid hull */
+  const rearBulkhead = new THREE.Mesh(
+    new THREE.BoxGeometry(6.55, 2.25, 0.38),
+    hullMat
+  );
+  rearBulkhead.position.set(0, CY - 0.02, CZ + 3.72);
+  ship.add(rearBulkhead);
+
+  const rearPanel = new THREE.Mesh(
+    new THREE.BoxGeometry(3.2, 1.15, 0.05),
+    hullDarkMat
+  );
+  rearPanel.position.set(0, CY - 0.02, CZ + 3.50);
+  ship.add(rearPanel);
+
+  /* roof shoulder pieces visually connect the shell to both side walls */
+  [-1, 1].forEach(side => {
+    const shoulder = new THREE.Mesh(
+      new THREE.BoxGeometry(0.42, 0.72, 3.72),
+      hullMat
+    );
+    shoulder.position.set(side * 3.12, CY + 0.68, CZ + 1.72);
+    shoulder.rotation.z = -side * 0.12;
+    ship.add(shoulder);
+  });
+
+  /* ============================================================
      FRONT TOP FRAME
      ============================================================ */
   const frontTop = new THREE.Mesh(
