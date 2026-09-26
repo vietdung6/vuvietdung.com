@@ -223,7 +223,7 @@ try {
     'Episode field identifies a position in its Arc, not a count');
   assert.equal(await admin.locator('table thead th').count(), 3,
     'Episode list does not contain an empty status column');
-  assert((await admin.locator('table thead').innerText()).includes('Số hiển thị'),
+  assert((await admin.locator('table thead').textContent()).includes('Số hiển thị'),
     'Admin table explains that the first column is a displayed number');
 
   // The restored Settings tab edits site metadata and synopsis without publishing a chapter.
