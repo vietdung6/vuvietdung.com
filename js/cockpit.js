@@ -18,7 +18,7 @@ import { emit } from './events.js';
    Canopy windows at z = -9.9, matching ship.js
    ============================================================ */
 export const cockpit = new THREE.Group();
-scene.add(cockpit);
+/* Added to the real ship by main.js; no standalone scene copy. */
 
 export const interactiveObjects = [];
 export const bowLights = [];
@@ -41,6 +41,9 @@ cockpit.add(cockpitLookAnchor);
    ============================================================ */
 const canopyGroup = new THREE.Group();
 cockpit.add(canopyGroup);
+/* The exterior ship owns the real canopy frame/glass now.
+   Keep this legacy geometry disabled to avoid duplicate/z-fighting panes. */
+canopyGroup.visible = false;
 
 const CY = 0.85, CZ = -9.9;
 
@@ -876,9 +879,8 @@ export function updateCockpit(t, dt) {
     sw.userData.lever.rotation.x += (target - sw.userData.lever.rotation.x) * Math.min(1, dt * 10);
   });
 
-  /* Idle sway */
-  cockpit.position.y = Math.sin(t * 0.42) * 0.035;
-  cockpit.position.x = Math.cos(t * 0.31) * 0.028;
+  /* The interior is rigidly mounted to ship.
+     Ship motion is inherited from the parent transform. */
 
   /* Bow running lights */
   bowLights.forEach((l, i) => { l.visible = Math.sin(t * 2.4 + i * 1.7) > -0.15; });
