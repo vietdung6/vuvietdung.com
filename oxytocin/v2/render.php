@@ -107,7 +107,8 @@ function v2_text_visible(string $body, string $format): bool {
         $body = v2_sanitize_html($body);
         // Scene dividers alone do not constitute a publishable chapter.
         $body = preg_replace('/<p class="scene-break">.*?<\/p>/su', '', $body) ?? $body;
-        return trim(html_entity_decode(strip_tags($body), ENT_QUOTES | ENT_HTML5, 'UTF-8')) !== '';
+        $visible = html_entity_decode(strip_tags($body), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return preg_replace('/[\p{Z}\s\x{200B}\x{FEFF}]+/u', '', $visible) !== '';
     }
     return trim($body) !== '';
 }
