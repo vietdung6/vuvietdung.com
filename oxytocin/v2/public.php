@@ -3,8 +3,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/lib.php';
 
 /**
- * A public outline is based exclusively on published chapters in active parts.
- * Do not load chapter bodies here: even the full table of contents stays lightweight.
+ * Show every active Part on the homepage, even before its first chapter.
+ * Inside each Part, expose only Arcs/Episodes that contain published chapters.
+ * Coming-soon Parts and draft content stay private. No chapter bodies are loaded.
  * Stable IDs are used in URLs; public chapter numbers derive from story order.
  */
 function v2_public_outline(PDO $db): array {
@@ -23,7 +24,18 @@ function v2_public_outline(PDO $db): array {
         WHERE c.status='published' AND p.status='active'
         ORDER BY p.part_num, p.id, a.arc_num, a.id, e.ep_num, e.id, c.sort_order, c.id";
     $rows = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    // A new active Part must appear immediately, independently of chapter publication.
+    // The chapter-only query below must not determine which Parts are visible.
     $parts = [];
+    foreach ($db->query("SELECT id,part_num,badge,title_en,title_vi,description
+        FROM parts WHERE status='active' ORDER BY part_num,id")->fetchAll(PDO::FETCH_ASSOC) as $part) {
+        $partId = (int)$part['id'];
+        $parts[$partId] = [
+            'id'=>$partId, 'num'=>(int)$part['part_num'], 'badge'=>$part['badge'],
+            'en'=>$part['title_en'], 'vi'=>$part['title_vi'],
+            'description'=>$part['description'], 'arcs'=>[]
+        ];
+    }
     $byPart = [];
     $byArc = [];
     $byEpisode = [];
@@ -35,13 +47,7 @@ function v2_public_outline(PDO $db): array {
         $arcId = (int)$row['arc_id'];
         $episodeId = (int)$row['episode_id'];
         $chapterId = (int)$row['chapter_id'];
-        if (!isset($parts[$partId])) {
-            $parts[$partId] = [
-                'id' => $partId, 'num' => (int)$row['part_num'], 'badge' => $row['part_badge'],
-                'en' => $row['part_en'], 'vi' => $row['part_vi'],
-                'description' => $row['part_description'], 'arcs' => []
-            ];
-        }
+        if (!isset($parts[$partId])) continue; // Never expose a hidden Part.
         if (!isset($parts[$partId]['arcs'][$arcId])) {
             $parts[$partId]['arcs'][$arcId] = [
                 'id' => $arcId, 'num' => (int)$row['arc_num'], 'slug' => $row['arc_slug'],

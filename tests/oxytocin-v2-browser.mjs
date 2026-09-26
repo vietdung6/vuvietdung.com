@@ -58,8 +58,14 @@ try {
   page.on('pageerror', error => errors.push(error.message));
 
   await page.goto(at('index.php'));
-  assert.equal(await page.locator('.v2-parts-grid > a.v2-part-card').count(), 1,
-    'Homepage contains one published Part as an actual link');
+  assert.equal(await page.locator('.v2-parts-grid > a.v2-part-card').count(), 2,
+    'Homepage includes published and newly created active Parts, even without chapters');
+  assert((await page.locator('.v2-parts-grid').innerText()).includes('UPCOMING_EMPTY_PART'),
+    'Unpublished empty active Part appears on the home page');
+  assert(!(await page.locator('.v2-parts-grid').innerText()).includes('Hidden'),
+    'Coming-soon Part title is not leaked');
+  assert.equal(await page.locator('.v2-part-card').last().locator('.arc-card-meta').count(), 0,
+    'Empty active Part does not display meaningless zero Arc / episode counts');
   assert.equal(await page.locator('details, summary').count(), 0,
     'Homepage must navigate to another page, never expand in place');
   assert.equal(await page.locator('#toc-title').innerText(), 'Mục lục',
@@ -67,7 +73,7 @@ try {
   assert((await page.locator('.v2-library-title').evaluate(node =>
     getComputedStyle(node).fontFamily)).includes('Cormorant Garamond'),
     'Vietnamese section heading uses original novel typography');
-  assert((await page.locator('.v2-part-card .arc-card-title').evaluate(node =>
+  assert((await page.locator('.v2-part-card .arc-card-title').first().evaluate(node =>
     getComputedStyle(node).fontFamily)).includes('Cinzel'),
     'Original cover-title typography is restored');
   assert.equal(await page.locator('svg').count(), 0,
@@ -79,7 +85,12 @@ try {
   assert(!(await page.locator('body').innerText()).includes('Trang riêng của phần'));
   assert(!(await page.locator('body').innerText()).includes('SECRET_DRAFT_SHOULD_NOT_LEAK'));
   await assertNoOverflow(page, 'Desktop cover');
-  await page.locator('.v2-part-card').click();
+  await page.locator('.v2-part-card').last().click();
+  assert(page.url().includes('part.php?id=3'), 'New empty Part is navigable');
+  assert((await page.locator('.reader-empty').innerText()).includes('chưa có chương'),
+    'New empty Part has a useful empty state');
+  await page.goto(at('index.php'));
+  await page.locator('.v2-part-card').first().click();
   assert(page.url().includes('part.php?id=1'), 'Clicking a Part opens a separate page');
   assert.equal(await page.locator('.v2-arc-shelf .episode-card').count(), 2,
     'Part page shows the original episode cards');
@@ -319,7 +330,7 @@ try {
   mobile.on('pageerror', error => errors.push('mobile: ' + error.message));
   await mobile.goto(at('index.php'));
   await assertNoOverflow(mobile, 'Mobile cover');
-  await mobile.locator('.v2-part-card').click();
+  await mobile.locator('.v2-part-card').first().click();
   await assertNoOverflow(mobile, 'Mobile Part');
   await mobile.locator('.v2-arc-heading a').click();
   await assertNoOverflow(mobile, 'Mobile Arc');

@@ -16,6 +16,9 @@ v2_reader_breadcrumb([['label'=>$part['badge'] ?: 'Phần ' . $part['num']]]);
     <?php if ($part['description']): ?><p class="page-intro"><?= nl2br(v2_h($part['description'])) ?></p><?php endif; ?>
 </header>
 <section class="v2-part-shelves" aria-label="Danh sách Arc">
+    <?php if (!$part['arcs']): ?>
+        <p class="reader-empty">Phần này chưa có chương được đăng.</p>
+    <?php endif; ?>
     <?php foreach ($part['arcs'] as $arc): ?>
     <section class="mini-toc v2-arc-shelf">
         <div class="mini-toc-label v2-arc-heading"><span class="v2-arc-index">Arc <?= $arc['num'] ?></span><a href="arc.php?id=<?= $arc['id'] ?>"><?= v2_h(v2_display_title($arc['en'],$arc['vi'])) ?></a></div>

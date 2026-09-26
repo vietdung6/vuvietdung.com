@@ -41,9 +41,11 @@ v2_reader_open($site['site_title'] ?: 'OXYTOCIN', 'home');
             <h3 class="arc-card-title"><?= v2_h($part['en'] ?: $part['vi']) ?></h3>
             <?php if ($part['en'] && $part['vi']): ?><div class="arc-card-subtitle"><?= v2_h($part['vi']) ?></div><?php endif; ?>
             <?php if ($part['description']): ?><p class="arc-card-desc"><?= nl2br(v2_h($part['description'])) ?></p><?php endif; ?>
+            <?php if ($part['arcs']): ?>
             <div class="arc-card-meta">
                 <span class="arc-card-count"><?= count($part['arcs']) ?> Arc · <?= array_sum(array_map(static fn($arc) => count($arc['episodes']), $part['arcs'])) ?> tập</span>
             </div>
+            <?php endif; ?>
         </a>
         <?php endforeach; ?>
     </div>
