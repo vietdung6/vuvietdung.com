@@ -36,7 +36,7 @@ curl -fsS "$base/chapter.php?id=3" >"$test_dir/chapter3.html"
 curl -fsS "$base/episode-read.php?id=1" >"$test_dir/full.html"
 curl -fsS "$base/chapter.php?id=4" >"$test_dir/chapter4.html"
 
-grep -q 'class="outline-part"' "$test_dir/index.html"
+grep -q 'class="outline-part v2-part-card"' "$test_dir/index.html"
 grep -q 'class="outline-arc"' "$test_dir/index.html"
 grep -q 'Tập 0' "$test_dir/index.html"
 grep -q 'Chương 1' "$test_dir/index.html"
