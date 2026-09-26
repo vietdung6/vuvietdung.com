@@ -9,9 +9,9 @@ header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 header("Content-Security-Policy: default-src 'none'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'none'; base-uri 'none'; frame-ancestors 'none'");
 ini_set('session.use_strict_mode', '1');
-session_name('oxy_v2_admin');
+// Shared login session with the existing OXYTOCIN admin.
 session_start();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SESSION['v2_authenticated'])
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_SESSION['admin'])
     || !is_string($_POST['csrf'] ?? null)
     || !is_string($_SESSION['csrf'] ?? null)
     || !hash_equals($_SESSION['csrf'], $_POST['csrf'])) {
