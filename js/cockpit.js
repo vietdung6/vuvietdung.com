@@ -25,6 +25,17 @@ export const bowLights = [];
 export const sticks = [];
 export const stickMeshes = [];
 
+/* Camera anchors live inside the same cockpit geometry.
+   The camera-control module reads their world positions every frame,
+   so the interior view cannot drift away from the physical cabin. */
+export const cockpitCameraAnchor = new THREE.Object3D();
+cockpitCameraAnchor.position.set(0, 0.95, -4.85);
+cockpit.add(cockpitCameraAnchor);
+
+export const cockpitLookAnchor = new THREE.Object3D();
+cockpitLookAnchor.position.set(0, 0.62, -14.0);
+cockpit.add(cockpitLookAnchor);
+
 /* ============================================================
    CANOPY FRAME — matches ship.js EXACTLY
    ============================================================ */
@@ -176,6 +187,28 @@ const floor = new THREE.Mesh(
 );
 floor.position.set(0, -2.55, -5.5);
 cockpit.add(floor);
+
+/* --- REAR PRESSURE BULKHEAD --- */
+const rearBulkhead = new THREE.Mesh(
+  new THREE.BoxGeometry(7.2, 4.7, 0.18),
+  MAT_PANEL
+);
+rearBulkhead.position.set(0, -0.15, -1.88);
+cockpit.add(rearBulkhead);
+
+const rearDoor = new THREE.Mesh(
+  new THREE.BoxGeometry(2.15, 3.35, 0.08),
+  MAT_DARK
+);
+rearDoor.position.set(0, -0.20, -1.97);
+cockpit.add(rearDoor);
+
+const rearDoorEdge = new THREE.Mesh(
+  new THREE.BoxGeometry(2.32, 3.52, 0.035),
+  MAT_EDGE_AMBER
+);
+rearDoorEdge.position.set(0, -0.20, -2.02);
+cockpit.add(rearDoorEdge);
 
 /* --- 2 FLOOR LED STRIPS --- */
 [-1.6, 1.6].forEach(x => {
