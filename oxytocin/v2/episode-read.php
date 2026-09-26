@@ -34,11 +34,8 @@ v2_reader_breadcrumb([
 </header>
 <?php foreach ($chapterBodies as $i => $body):
     $chapter = $numbers[(int)$body['id']]; ?>
-<section class="v2-full-chapter" id="chapter-<?= $chapter['id'] ?>" data-chapter-id="<?= $chapter['id'] ?>">
-    <header class="v2-full-heading">
-        <a href="chapter.php?id=<?= $chapter['id'] ?>">Chương <?= $chapter['number'] ?></a>
-        <?php if ($chapter['title']): ?><h2><?= v2_h($chapter['title']) ?></h2><?php endif; ?>
-    </header>
+<section class="v2-full-chapter" id="chapter-<?= $chapter['id'] ?>" data-chapter-id="<?= $chapter['id'] ?>" aria-label="Chương <?= $chapter['number'] ?>">
+    <?php if ($i > 0): ?><hr class="v2-chapter-divider" aria-hidden="true"><?php endif; ?>
     <article class="episode-body v2-reading-body"><?= v2_public_stored_chapter($body) ?></article>
 </section>
 <?php endforeach; ?>
