@@ -328,7 +328,7 @@ unset($_SESSION['flash']);
                 <?php if ($tab==='parts'): ?><?= (int)$row['part_num'] ?>
                 <?php elseif ($tab==='arcs'): ?><?= (int)$row['part_num'] ?> / <?= (int)$row['arc_num'] ?>
                 <?php elseif ($tab==='episodes'): ?><?= (int)$row['part_num'] ?> / <?= (int)$row['arc_num'] ?> / <?= (int)$row['ep_num'] ?>
-                <?php else: ?><?= $row['public_number'] === null ? 'Nháp' : 'Chương ' . $row['public_number'] ?>
+                <?php else: ?><?= $row['public_number'] === null ? ($row['status'] === 'published' ? 'Ẩn theo phần' : 'Nháp') : 'Chương ' . $row['public_number'] ?>
                     <small>Vị trí <?= (int)$row['sort_order'] ?></small>
                 <?php endif; ?>
             </td><td><strong><?= v2_h($tab==='chapters' ? ($row['title'] ?: 'Chương không tên') : (($row['title_vi'] ?: $row['title_en']))) ?></strong>
