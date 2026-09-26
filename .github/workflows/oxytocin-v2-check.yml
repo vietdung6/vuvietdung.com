@@ -5,6 +5,7 @@ on:
       - 'oxytocin/v2/**'
       - 'tests/oxytocin-v2.php'
       - 'tests/oxytocin-v2-editor.php'
+      - 'tests/oxytocin-v2-preview.php'
       - '.github/workflows/oxytocin-v2-check.yml'
   workflow_dispatch:
 
@@ -29,10 +30,13 @@ jobs:
           php -l oxytocin/v2/render.php
           php -l oxytocin/v2/preview.php
           php -l tests/oxytocin-v2-editor.php
+          php -l tests/oxytocin-v2-preview.php
           php -l tests/oxytocin-v2.php
       - name: SQLite CRUD and isolation tests
         run: php tests/oxytocin-v2.php
       - name: Rich editor and publication tests
         run: php tests/oxytocin-v2-editor.php
+      - name: Preview cannot publish
+        run: php tests/oxytocin-v2-preview.php
       - name: JavaScript syntax
         run: node --check oxytocin/v2/editor.js
