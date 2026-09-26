@@ -34,6 +34,5 @@ v2_reader_breadcrumb([
     <?php endforeach; ?>
     </ol>
     <a class="reader-primary" href="episode-read.php?id=<?= $episode['id'] ?>">Đọc toàn bộ tập</a>
-    <p class="reader-hint">Đọc liền các chương đã đăng, không có bản nội dung riêng.</p>
 </section>
 <?php v2_reader_close(); ?>
