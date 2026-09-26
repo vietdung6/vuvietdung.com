@@ -411,3 +411,64 @@ function v2_numbered_chapters(PDO $db): array {
     unset($chapter);
     return $chapters;
 }
+
+
+/**
+ * Independent v2 homepage settings; the old oxytocin.db is never consulted.
+ * Keep defaults readable on a brand-new, empty site.
+ */
+function v2_site_settings(PDO $db): array {
+    $defaults = [
+        'site_title' => 'OXYTOCIN',
+        'site_subtitle' => 'Xúc Cảm',
+        'site_author' => 'VVD',
+        'site_genre' => 'Psychological Thriller',
+        'site_status' => 'Đang viết',
+        'synopsis' => ''
+    ];
+    $result = $defaults;
+    $stmt = $db->query('SELECT key, value FROM settings');
+    foreach ($stmt as $row) {
+        if (array_key_exists((string)$row['key'], $result)) {
+            $result[$row['key']] = (string)($row['value'] ?? '');
+        }
+    }
+    return $result;
+}
+
+function v2_save_site_settings(PDO $db, array $post): void {
+    $limits = [
+        'site_title' => 120,
+        'site_subtitle' => 120,
+        'site_author' => 120,
+        'site_genre' => 180,
+        'site_status' => 120,
+        'synopsis' => 40000
+    ];
+    $values = [];
+    foreach ($limits as $key => $limit) {
+        if (!array_key_exists($key, $post) || !is_string($post[$key])) {
+            throw new DomainException('Thiếu dữ liệu cài đặt trang.');
+        }
+        $value = trim($post[$key]);
+        if (mb_strlen($value, 'UTF-8') > $limit) {
+            throw new DomainException('Trường ' . $key . ' vượt quá giới hạn ký tự.');
+        }
+        $values[$key] = $value;
+    }
+    if ($values['site_title'] === '') {
+        throw new DomainException('Tiêu đề trang không được để trống.');
+    }
+    $db->beginTransaction();
+    try {
+        $stmt = $db->prepare(
+            'INSERT INTO settings (key, value) VALUES (?, ?)
+             ON CONFLICT(key) DO UPDATE SET value=excluded.value'
+        );
+        foreach ($values as $key => $value) $stmt->execute([$key,$value]);
+        $db->commit();
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        throw $e;
+    }
+}
