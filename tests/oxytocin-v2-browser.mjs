@@ -8,15 +8,10 @@ import { chromium, devices } from 'playwright';
 // Genuine Chromium E2E against a temporary SQLite file and PHP built-in HTTP server.
 // This never connects to the production database or authenticates with a real password.
 const root = mkdtempSync(join(tmpdir(), 'oxy-v2-e2e-'));
-const secret = 'OXYTOCIN_E2E_ONLY_NOT_A_REAL_PASSWORD';
-const phpHash = spawnSync('php', ['-r', 'echo password_hash($argv[1], PASSWORD_DEFAULT);', secret], {
-  encoding: 'utf8'
-});
-assert.equal(phpHash.status, 0, phpHash.stderr);
 const env = {
   ...process.env,
   OXYTOCIN_V2_DB_PATH: join(root, 'temporary-oxytocin-v2.db'),
-  OXYTOCIN_V2_ADMIN_PASSWORD_HASH: phpHash.stdout.trim()
+  OXYTOCIN_V2_TEST_MODE: '1'
 };
 function cli(...args) {
   const result = spawnSync('php', args, { env, encoding: 'utf8', timeout: 30_000 });
@@ -117,15 +112,17 @@ try {
   assert(await continueLink.isVisible(), 'Continue-reading link appears');
   assert.equal(await continueLink.getAttribute('href'), 'episode-read.php?id=1');
 
-  // Author flow uses the test-only password and isolated test DB.
+  // Author flow reuses the existing OXYTOCIN PHPSESSID.
   const admin = await context.newPage();
   admin.on('dialog', dialog => dialog.accept());
   admin.on('pageerror', error => errors.push('admin: ' + error.message));
   await admin.goto(at('admin.php'));
-  await admin.locator('input[name="password"]').fill(secret);
-  await admin.getByRole('button', { name: 'Đăng nhập' }).click();
-  await admin.waitForURL(/admin\.php\?tab=chapters/);
-  assert.equal(await admin.locator('#chapterForm').count(), 1, 'Admin chapter form');
+  assert.equal(await admin.locator('#chapterForm').count(), 0, 'Unauthenticated author cannot edit');
+  assert(await admin.getByRole('link', { name: 'Đăng nhập admin OXYTOCIN' }).isVisible());
+  await admin.goto(origin + '/tests/oxytocin-v2-legacy-login.php');
+  assert((await admin.locator('body').innerText()).includes('TEST SESSION READY'));
+  await admin.goto(at('admin.php'));
+  assert.equal(await admin.locator('#chapterForm').count(), 1, 'Existing admin session unlocks v2');
 
   // Device-local automatic recovery must not publish.
   const editor = admin.locator('#chapterEditor');
