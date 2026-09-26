@@ -5,6 +5,7 @@ on:
       - 'oxytocin/v2/**'
       - 'tests/oxytocin-v2.php'
       - 'tests/oxytocin-v2-editor.php'
+      - 'tests/oxytocin-v2-settings.php'
       - 'tests/oxytocin-v2-preview.php'
       - 'tests/oxytocin-v2-reader.php'
       - 'tests/oxytocin-v2-reader-fixture.php'
@@ -51,6 +52,7 @@ jobs:
           php -l tests/oxytocin-v2-reader.php
           php -l tests/oxytocin-v2-reader-fixture.php
           php -l tests/oxytocin-v2-editor.php
+          php -l tests/oxytocin-v2-settings.php
           php -l tests/oxytocin-v2-preview.php
           php -l tests/oxytocin-v2.php
           php -l tests/oxytocin-v2-autoinit.php
@@ -61,6 +63,8 @@ jobs:
         run: php tests/oxytocin-v2-autoinit.php
       - name: Rich editor and publication tests
         run: php tests/oxytocin-v2-editor.php
+      - name: Site settings, synopsis and legacy separation
+        run: php tests/oxytocin-v2-settings.php
       - name: Preview cannot publish
         run: php tests/oxytocin-v2-preview.php
       - name: Reader access and navigation tests

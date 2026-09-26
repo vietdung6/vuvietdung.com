@@ -76,7 +76,7 @@ try {
     exit('Database v2 chưa sẵn sàng. Nội dung cũ không bị ảnh hưởng.');
 }
 
-$validTabs = ['parts','arcs','episodes','chapters'];
+$validTabs = ['parts','arcs','episodes','chapters','settings'];
 $tab = (string)($_GET['tab'] ?? 'chapters');
 if (!in_array($tab, $validTabs, true)) $tab = 'chapters';
 $authenticated = !empty($_SESSION['admin']);
@@ -113,7 +113,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new DomainException('Thao tác chương không hợp lệ.');
             }
         }
-        if (in_array($action, ['save','save_publish','update_published'], true)) {
+        if ($type === 'settings' && $action === 'save_settings') {
+            v2_save_site_settings($db, $_POST);
+            v2_flash('Đã lưu cài đặt trang truyện v2.');
+        } elseif (in_array($action, ['save','save_publish','update_published'], true)) {
             if ($type !== 'chapters' && $action !== 'save') {
                 throw new DomainException('Thao tác không hợp lệ.');
             }
@@ -157,7 +160,10 @@ unset($_SESSION['flash']);
 ?>
 <!doctype html><html lang="vi"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Quản trị OXYTOCIN v2</title><link rel="stylesheet" href="admin.css"><link rel="stylesheet" href="editor.css"><script src="editor.js" defer></script>
+<title>Quản trị OXYTOCIN v2</title>
+<link rel="stylesheet" href="admin.css?v=<?= filemtime(__DIR__ . '/admin.css') ?>">
+<link rel="stylesheet" href="editor.css?v=<?= filemtime(__DIR__ . '/editor.css') ?>">
+<script src="editor.js?v=<?= filemtime(__DIR__ . '/editor.js') ?>" defer></script>
 </head><body>
 <?php if (!$authenticated): ?>
 <main class="login card">
@@ -172,7 +178,7 @@ unset($_SESSION['flash']);
     $arcs = v2_rows($db, 'arcs');
     $episodes = v2_rows($db, 'episodes');
     $chapters = v2_numbered_chapters($db);
-    $rows = ['parts'=>$parts,'arcs'=>$arcs,'episodes'=>$episodes,'chapters'=>$chapters][$tab];
+    $rows = ['parts'=>$parts,'arcs'=>$arcs,'episodes'=>$episodes,'chapters'=>$chapters,'settings'=>[]][$tab];
     $editId = v2_num($_GET['edit'] ?? '0');
     $edit = null;
     foreach ($rows as $row) if ((int)$row['id'] === $editId) $edit = $row;
@@ -186,18 +192,59 @@ unset($_SESSION['flash']);
     $episodeOptions = [];
     foreach ($episodes as $e) $episodeOptions[$e['id']] = 'Phần ' . $e['part_num'] . ' / Arc ' . $e['arc_num'] . ' / Tập ' . $e['ep_num'];
 ?>
-<header class="topbar"><div><span class="eyebrow">HỆ THỐNG THỬ NGHIỆM / V2</span><h1>OXYTOCIN CMS</h1></div>
-<div class="top-links"><a href="../index.php" target="_blank" rel="noopener noreferrer">Trang truyện cũ ↗</a>
-<form method="post"><?php v2_hidden('', 'logout'); ?><button type="submit">Đăng xuất</button></form></div></header>
+<header class="topbar">
+    <div class="topbar-identity">
+        <span class="eyebrow">OXYTOCIN · QUẢN TRỊ TRUYỆN</span>
+        <h1>OXYTOCIN CMS</h1>
+        <div class="stats-bar" aria-label="Tổng quan">
+            <span>Phần <strong><?= count($parts) ?></strong></span>
+            <span>Arc <strong><?= count($arcs) ?></strong></span>
+            <span>Tập <strong><?= count($episodes) ?></strong></span>
+            <span>Chương <strong><?= count($chapters) ?></strong></span>
+        </div>
+    </div>
+    <div class="top-links">
+        <a href="index.php" target="_blank" rel="noopener noreferrer">Xem trang v2 ↗</a>
+        <a href="../index.php" target="_blank" rel="noopener noreferrer">Trang cũ ↗</a>
+        <form method="post"><?php v2_hidden('', 'logout'); ?><button type="submit">Đăng xuất</button></form>
+    </div>
+</header>
 <main class="workspace">
     <aside class="sidebar"><nav aria-label="Quản lý cấu trúc">
         <a class="<?= $tab==='parts'?'active':'' ?>" href="?tab=parts">Phần <span><?= count($parts) ?></span></a>
         <a class="<?= $tab==='arcs'?'active':'' ?>" href="?tab=arcs">Arc <span><?= count($arcs) ?></span></a>
         <a class="<?= $tab==='episodes'?'active':'' ?>" href="?tab=episodes">Tập <span><?= count($episodes) ?></span></a>
         <a class="<?= $tab==='chapters'?'active':'' ?>" href="?tab=chapters">Chương <span><?= count($chapters) ?></span></a>
-    </nav><p>Database v2 độc lập. Chương mới luôn là nháp; không tự động xuất bản.</p></aside>
+        <a class="<?= $tab==='settings'?'active':'' ?>" href="?tab=settings">Cài đặt trang <span>↗</span></a>
+    </nav>
+    <p class="sidebar-note">Dữ liệu v2 độc lập. Chương mới luôn là nháp.</p></aside>
     <section class="main-content">
         <?php if ($flash): ?><p class="notice <?= v2_h($flash['kind']) ?>" role="status"><?= v2_h($flash['text']) ?></p><?php endif; ?>
+        <?php if ($tab === 'settings'):
+            $site = v2_site_settings($db); ?>
+            <div class="card settings-card">
+                <div class="card-title-row">
+                    <div><span class="eyebrow">CÀI ĐẶT TRANG TRUYỆN</span><h2>Giới thiệu & hiển thị</h2></div>
+                    <a class="subtle-link" href="index.php" target="_blank" rel="noopener noreferrer">Xem trang truyện ↗</a>
+                </div>
+                <p class="settings-intro">Thông tin trên trang OXYTOCIN v2. Không ảnh hưởng trang và nội dung cũ.</p>
+                <form method="post" id="siteSettingsForm">
+                    <?php v2_hidden('settings', 'save_settings'); ?>
+                    <div class="form-grid">
+                        <?php v2_field('site_title','Tên truyện', $site['site_title'], 'text', true); ?>
+                        <?php v2_field('site_subtitle','Tên phụ', $site['site_subtitle']); ?>
+                        <?php v2_field('site_author','Tác giả', $site['site_author']); ?>
+                        <?php v2_field('site_genre','Thể loại', $site['site_genre']); ?>
+                        <?php v2_field('site_status','Trạng thái', $site['site_status']); ?>
+                    </div>
+                    <label class="field" for="siteSynopsis">Giới thiệu truyện
+                        <textarea id="siteSynopsis" name="synopsis" rows="12" placeholder="Viết phần giới thiệu xuất hiện trên trang chủ v2…"><?= v2_h($site['synopsis']) ?></textarea>
+                    </label>
+                    <p class="hint">Hỗ trợ xuống dòng và cú pháp Noir cũ: **chữ sáng**, *chữ đỏ*. Có thể để trống phần giới thiệu.</p>
+                    <div class="form-actions"><button class="primary" type="submit">Lưu cài đặt</button><a href="index.php" target="_blank" rel="noopener noreferrer">Xem kết quả ↗</a></div>
+                </form>
+            </div>
+        <?php else: ?>
         <?php if ($del): ?>
         <div class="card danger-zone"><h2>Xác nhận xóa</h2>
             <p>Đối tượng <strong><?= v2_h($tab) ?> #<?= (int)$del['id'] ?></strong>. Không thể xóa phần, Arc hay tập còn dữ liệu con. Chương đã đăng phải hủy đăng trước.</p>
@@ -312,6 +359,7 @@ unset($_SESSION['flash']);
             <?php endforeach; ?></tbody></table></div>
         <?php endif; ?></div>
         <p class="hint">Số chương hiển thị tính theo thứ tự Phần → Arc → Tập → vị trí chương. Thao tác ↑ ↓ thay đổi thứ tự trong cấp tương ứng.</p>
+        <?php endif; ?>
     </section>
 </main>
 <?php endif; ?></body></html>

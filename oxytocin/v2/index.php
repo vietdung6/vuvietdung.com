@@ -3,15 +3,28 @@ declare(strict_types=1);
 require_once __DIR__ . '/public.php';
 $db = v2_reader_database();
 $outline = v2_public_outline($db);
-v2_reader_open('Mục lục');
+$site = v2_site_settings($db);
+v2_reader_open($site['site_title'] ?: 'OXYTOCIN');
 ?>
 <header class="home-hero v2-hero">
-    <div class="brand">VVD · Novel</div>
-    <h1>OXYTOCIN</h1>
-    <div class="subtitle">Xúc Cảm</div>
+    <div class="brand">Light Novel</div>
+    <h1><?= v2_h($site['site_title']) ?></h1>
+    <?php if ($site['site_subtitle'] !== ''): ?>
+        <div class="subtitle"><?= v2_h($site['site_subtitle']) ?></div>
+    <?php endif; ?>
+    <div class="meta">
+        <?php if ($site['site_author'] !== ''): ?><p><strong>Tác giả:</strong> <?= v2_h($site['site_author']) ?></p><?php endif; ?>
+        <?php if ($site['site_genre'] !== ''): ?><p><strong>Thể loại:</strong> <?= v2_h($site['site_genre']) ?></p><?php endif; ?>
+        <?php if ($site['site_status'] !== ''): ?><p><strong>Trạng thái:</strong> <?= v2_h($site['site_status']) ?></p><?php endif; ?>
+    </div>
 </header>
-<section class="v2-toc" aria-labelledby="toc-title">
-<h2 id="toc-title">Mục lục</h2>
+<?php if ($site['synopsis'] !== ''): ?>
+<section class="synopsis v2-synopsis" aria-label="Giới thiệu truyện">
+    <?= v2_noir_html($site['synopsis']) ?>
+</section>
+<?php endif; ?>
+<nav class="arc-nav v2-toc" aria-labelledby="toc-title">
+<div class="arc-nav-label" id="toc-title">Mục lục · Cấu trúc truyện</div>
 <?php if (!$outline['parts']): ?>
     <p class="reader-empty">Chưa có chương nào được xuất bản.</p>
 <?php else: ?>
@@ -55,5 +68,5 @@ v2_reader_open('Mục lục');
 </details>
 <?php endforeach; ?>
 <?php endif; ?>
-</section>
+</nav>
 <?php v2_reader_close(); ?>

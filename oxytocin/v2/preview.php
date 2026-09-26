@@ -60,9 +60,9 @@ try {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title><?= v2_h($title ?: 'Chương không tên') ?> · Xem trước OXYTOCIN</title>
-<link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="preview.css">
-<link rel="stylesheet" href="reader.css">
+<link rel="stylesheet" href="../styles.css?v=<?= filemtime(dirname(__DIR__) . '/styles.css') ?>">
+<link rel="stylesheet" href="preview.css?v=<?= filemtime(__DIR__ . '/preview.css') ?>">
+<link rel="stylesheet" href="reader.css?v=<?= filemtime(__DIR__ . '/reader.css') ?>">
 </head><body>
 <div class="container">
     <div class="preview-notice" role="status">BẢN XEM TRƯỚC — Chưa đăng · Không được lưu lên máy chủ khi xem trước</div>
